@@ -29,6 +29,12 @@ python scripts/check.py --quick   # ruff・整形・slow 以外のテスト
 - 基本ルール（3〜4人用の公式ルールブック 2015年版）の数値に合わせる。数値はテスト（tests/test_rules.py）で固定している。
 - ルールを変えたら、テストと docs/ROADMAP.md の「ルールの要点」を同じ PR で直す。
 
+## 研究の進め方
+
+- 研究の「次にやること」は `docs/BACKLOG.md`。毎日の研究の回（shared-workflows の `routines/research-loop.md`）がここから1件ずつ進める。
+- 人に頼まれた研究も、始める前に一覧へ項目を足し（または「作業中」にし）、終わったら「済み」と結果を書く。結果は効かなかったものも `docs/EXPERIMENTS.md` に残す。
+- 重い対局・学習は `research-run.yml`（Actions、結果はブランチ `research-results`）で回す。
+
 ## 共通のきまり
 
 - PR の作り方・マージの仕方は satou-aaaaa/shared-workflows の `routines/pr.md`、全体のきまりは `routines/common.md` に従う。
