@@ -111,7 +111,24 @@ class Game:
 
     # ---- 便利関数 ----
     def clone(self) -> Game:
-        return copy.deepcopy(self)
+        """探索用の写し。盤面の並べ方など変わらないものは共有し、変わるものだけ写す。"""
+        g = Game.__new__(Game)
+        g.__dict__.update(self.__dict__)
+        g.rng = random.Random()
+        g.rng.setstate(self.rng.getstate())
+        g.players = [copy.copy(pl) for pl in self.players]
+        for pl in g.players:
+            pl.hand = list(pl.hand)
+            pl.dev = list(pl.dev)
+            pl.dev_new = list(pl.dev_new)
+        g.bank = list(self.bank)
+        g.dev_deck = list(self.dev_deck)
+        g.building = list(self.building)
+        g.is_city = list(self.is_city)
+        g.road = list(self.road)
+        g.longest_len = list(self.longest_len)
+        g.discard_queue = list(self.discard_queue)
+        return g
 
     @property
     def to_act(self) -> int:

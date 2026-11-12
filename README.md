@@ -17,6 +17,7 @@
 bash scripts/setup.sh          # .venv を作り requirements.txt を入れる（何度実行してもよい。Windows は Git Bash で）
 python scripts/check.py --quick  # ruff・整形・テスト
 python scripts/random_games.py --games 500  # ランダムに打つ対局でエンジンを点検
+python scripts/run_match.py --agents greedy,random,random,random --games 20  # 勝率（基準は25%）
 ```
 
 ## 中身
@@ -24,6 +25,12 @@ python scripts/random_games.py --games 500  # ランダムに打つ対局でエ�
 | 場所 | 内容 |
 |---|---|
 | `src/isle/board.py` | 盤面の形（六角形19・頂点54・辺72・港9）と、資源・数字のランダムな並べ方 |
-| `src/isle/game.py` | ルールエンジン（`legal_actions()` と `apply()`） |
+| `src/isle/game.py` | ルールエンジン（`legal_actions()` と `apply()`、探索用の速い `clone()`） |
+| `src/isle/features.py` | 盤面の特徴量と評価関数（手で決めた最初の重み） |
+| `src/isle/agents.py` | AI: ランダム、評価関数で1手先を選ぶ貪欲AI（山札はのぞかない） |
+| `src/isle/arena.py` | 対局の実行・記録（seed と手の列で再現）・席を入れ替えた成績 |
+| `src/isle/models.py` | 評価関数の重みの保存と読み込み（`models/*.json`） |
+| `scripts/run_match.py` | 4人の対局を席を入れ替えて回し、勝率を出す |
+| `scripts/tune_spsa.py` | 対局の勝ち負けから重みを直接合わせる（SPSA） |
 | `tests/` | ルールのテスト |
 | `scripts/check.py` | push 前・CI の確認 |
