@@ -1,0 +1,5 @@
+finished: 2026-11-12T08:04Z
+exit_code: 1
+commit: 16c8de656e961d04d22f1163d9ffb83af42a4201
+run: https://github.com/satou-aaaaa/isle-routes-research/actions/runs/43179926600
+command: python -c "import isle; print('ok')" && echo ok > "$RESEARCH_OUT/ok.txt"
