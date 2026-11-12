@@ -1,0 +1,20 @@
+[project]
+name = "isle-routes-research"
+version = "0.1.0"
+description = "Isle Routes (original 4-player hex resource game) AI research"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = ["slow: 時間のかかる強さの検証（scripts/check.py --quick では飛ばす）"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

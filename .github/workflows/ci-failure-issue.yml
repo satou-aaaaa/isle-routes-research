@@ -1,0 +1,19 @@
+name: CI failure issue
+
+# main で下のワークフローが失敗したらラベル ci-failure の Issue を立て、次に成功したら閉じる（Claude は使わない）。
+# 中身は共通部品 satou-aaaaa/shared-workflows にある。ここには見張るワークフローの名前（name:）だけを書く。
+on:
+  workflow_run:
+    workflows: ["test", "Setup check"]
+    types: [completed]
+  schedule:
+    - cron: "41 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  actions: read
+
+jobs:
+  report:
+    uses: satou-aaaaa/shared-workflows/.github/workflows/ci-failure-issue.yml@main
