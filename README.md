@@ -27,8 +27,10 @@ python scripts/run_match.py --agents greedy,random,random,random --games 20  # �
 | `src/isle/board.py` | 盤面の形（六角形19・頂点54・辺72・港9）と、資源・数字のランダムな並べ方 |
 | `src/isle/game.py` | ルールエンジン（`legal_actions()` と `apply()`、探索用の速い `clone()`） |
 | `src/isle/features.py` | 盤面の特徴量と評価関数（手で決めた最初の重み） |
-| `src/isle/agents.py` | AI: ランダム、評価関数で1手先を選ぶ貪欲AI（山札はのぞかない） |
+| `src/isle/agents.py` | AI: ランダム、評価関数で1手先を選ぶ貪欲AI（山札はのぞかない）、勝てる手番を逃さない `greedy_win`（いまの最強） |
 | `src/isle/arena.py` | 対局の実行・記録（seed と手の列で再現）・席を入れ替えた成績 |
+| `src/isle/solver.py` | 手番の中を読み切り、この手番で勝てる筋を探す厳密ソルバー |
+| `scripts/gto_turn_check.py` | 「勝てる手番を逃した」回数を数える |
 | `src/isle/models.py` | 評価関数の重みの保存と読み込み（`models/*.json`） |
 | `scripts/run_match.py` | 4人の対局を席を入れ替えて回し、勝率を出す |
 | `scripts/tune_spsa.py` | 対局の勝ち負けから重みを直接合わせる（SPSA） |

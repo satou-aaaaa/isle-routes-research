@@ -9,11 +9,13 @@ from .features import DEFAULT_WEIGHTS, F, evaluate
 from .game import (
     COST,
     DISCARD,
+    MAIN,
     PRE_ROLL,
     ROBBER,
     STEAL,
     Game,
 )
+from .solver import find_win
 
 DEV_VP_SHARE = 5 / 25  # 発展カードの山に占める得点カードの割合（買う手の見積もりに使う）
 MAX_ACTIONS_PER_TURN = 40  # 交換の行ったり来たりを止める安全弁
@@ -128,7 +130,37 @@ class GreedyAgent:
         return v
 
 
-AGENTS = {"random": RandomAgent, "greedy": GreedyAgent}
+class WinCheckAgent(GreedyAgent):
+    """貪欲AIに「この手番で勝てる手順があれば必ずそれを打つ」を足したもの（solver.find_win）。"""
+
+    name = "greedy_win"
+
+    def __init__(self, weights=DEFAULT_WEIGHTS, seed: int | None = None):
+        super().__init__(weights, seed)
+        self._plan: list[tuple] = []
+        self._plan_turn = None
+        self._checked_turn = None
+
+    def act(self, g: Game) -> tuple:
+        if g.to_act == g.current and g.phase not in (PRE_ROLL, DISCARD):
+            turn = (g.turns, g.current)
+            if self._plan and self._plan_turn == turn:
+                a = self._plan[0]
+                if a in g.legal_actions():
+                    self._plan.pop(0)
+                    return a
+                self._plan = []
+                self._checked_turn = None  # 運で筋が変わったら読み直す
+            if g.phase == MAIN and self._checked_turn != turn:
+                self._checked_turn = turn
+                line = find_win(g)
+                if line:
+                    self._plan, self._plan_turn = list(line[1:]), turn
+                    return line[0]
+        return super().act(g)
+
+
+AGENTS = {"random": RandomAgent, "greedy": GreedyAgent, "greedy_win": WinCheckAgent}
 
 
 def make_agent(name: str, seed: int | None = None):
