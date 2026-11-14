@@ -18,7 +18,6 @@
 
 from __future__ import annotations
 
-import copy
 import random
 from dataclasses import dataclass, field
 
@@ -50,6 +49,18 @@ LONGEST_MIN = 5
 ARMY_MIN = 3
 MAX_TURNS = 1000  # 終わらない対局を止める安全弁
 
+# 速さのための表（盤の形だけで決まる）
+# 頂点ごとの (辺, 辺の向こうの頂点)
+_VERTEX_STEPS = tuple(
+    tuple((e, TOPO.edges[e][1] if TOPO.edges[e][0] == v else TOPO.edges[e][0]) for e in es)
+    for v, es in enumerate(TOPO.vertex_edges)
+)
+# 辺ごとに、両端の頂点と「その頂点に接するほかの辺」
+_EDGE_ENDS = tuple(
+    tuple((v, tuple(f for f in TOPO.vertex_edges[v] if f != e)) for v in TOPO.edges[e])
+    for e in range(N_EDGE)
+)
+
 # 場面
 SETUP_SETTLE, SETUP_ROAD, PRE_ROLL, DISCARD, ROBBER, STEAL, MAIN, FREE_ROAD, OVER = range(9)
 
@@ -66,6 +77,14 @@ class Player:
 
     def cards(self) -> int:
         return sum(self.hand)
+
+    def copy(self) -> Player:
+        c = Player.__new__(Player)
+        c.__dict__.update(self.__dict__)
+        c.hand = self.hand[:]
+        c.dev = self.dev[:]
+        c.dev_new = self.dev_new[:]
+        return c
 
 
 class Game:
@@ -85,6 +104,7 @@ class Game:
         self.robber = self.layout.desert
         self.longest_holder: int | None = None
         self.longest_len = [0] * n_players
+        self.longest_fresh = False  # longest_len が全員ぶん今の盤と合っているか
         self.army_holder: int | None = None
         # 初期配置の順: 0,1,2,3,3,2,1,0
         self.setup_order = list(range(n_players)) + list(reversed(range(n_players)))
@@ -108,6 +128,11 @@ class Game:
             ]
             for v in range(N_VERTEX)
         ]
+        # 出目ごとの (頂点, 六角形, 資源)。produce() で全頂点を見ないため
+        self.number_yield: list[list[tuple[int, int, int]]] = [[] for _ in range(13)]
+        for v in range(N_VERTEX):
+            for h, r, num in self.vertex_yield[v]:
+                self.number_yield[num].append((v, h, r))
 
     # ---- 便利関数 ----
     def clone(self) -> Game:
@@ -116,11 +141,7 @@ class Game:
         g.__dict__.update(self.__dict__)
         g.rng = random.Random()
         g.rng.setstate(self.rng.getstate())
-        g.players = [copy.copy(pl) for pl in self.players]
-        for pl in g.players:
-            pl.hand = list(pl.hand)
-            pl.dev = list(pl.dev)
-            pl.dev_new = list(pl.dev_new)
+        g.players = [pl.copy() for pl in self.players]
         g.bank = list(self.bank)
         g.dev_deck = list(self.dev_deck)
         g.building = list(self.building)
@@ -174,17 +195,54 @@ class Game:
         return any(self.road[e] == p for e in TOPO.vertex_edges[v])
 
     def _road_ok(self, p: int, e: int) -> bool:
-        if self.road[e] != -1:
+        road = self.road
+        if road[e] != -1:
             return False
-        for v in TOPO.edges[e]:
-            owner = self.building[v]
+        building = self.building
+        for v, others in _EDGE_ENDS[e]:
+            owner = building[v]
             if owner == p:
                 return True
             if owner != -1:
                 continue  # 他人の建物の先にはつながらない
-            if any(self.road[f] == p for f in TOPO.vertex_edges[v] if f != e):
-                return True
+            for f in others:
+                if road[f] == p:
+                    return True
         return False
+
+    def _road_spots(self, p: int) -> list[int]:
+        """p が道を置ける辺（番号の小さい順）。"""
+        road, building = self.road, self.building
+        out = []
+        for e in range(N_EDGE):
+            if road[e] != -1:
+                continue
+            for v, others in _EDGE_ENDS[e]:
+                owner = building[v]
+                if owner == p:
+                    out.append(e)
+                    break
+                if owner != -1:
+                    continue
+                if road[others[0]] == p or (len(others) > 1 and road[others[1]] == p):
+                    out.append(e)
+                    break
+        return out
+
+    def _trade_ratios(self, p: int) -> list[int]:
+        """資源ごとの交換の比（_trade_ratio を5資源まとめて）。"""
+        out = [4] * 5
+        generic = False
+        building = self.building
+        for v, kind in self.vertex_port.items():
+            if building[v] == p:
+                if kind == GENERIC:
+                    generic = True
+                else:
+                    out[kind] = 2
+        if generic:
+            out = [min(x, 3) for x in out]
+        return out
 
     def _trade_ratio(self, p: int, r: int) -> int:
         ratio = 4
@@ -224,44 +282,54 @@ class Game:
         if ph == STEAL:
             return [("steal", q) for q in self._steal_targets()]
         if ph == FREE_ROAD:
-            return [("free_road", e) for e in range(N_EDGE) if self._road_ok(p, e)]
-        # MAIN
+            return [("free_road", e) for e in self._road_spots(p)]
+        # MAIN（費用の確かめは COST と同じ中身を手で書いて速くしている）
         acts: list[tuple] = [("end",)]
-        if pl.roads < MAX_ROADS and self._can_pay(p, COST["road"]):
-            acts += [("build_road", e) for e in range(N_EDGE) if self._road_ok(p, e)]
-        if pl.settlements < MAX_SETTLEMENTS and self._can_pay(p, COST["settlement"]):
+        wood, brick, wool, grain, ore = pl.hand
+        building = self.building
+        if pl.roads < MAX_ROADS and wood and brick:
+            acts += [("build_road", e) for e in self._road_spots(p)]
+        if pl.settlements < MAX_SETTLEMENTS and wood and brick and wool and grain:
+            road = self.road
+            neighbors = TOPO.vertex_neighbors
+            vedges = TOPO.vertex_edges
+            for v in range(N_VERTEX):
+                if building[v] != -1:
+                    continue
+                if any(building[u] != -1 for u in neighbors[v]):
+                    continue
+                if any(road[e] == p for e in vedges[v]):
+                    acts.append(("build_settlement", v))
+        if pl.cities < MAX_CITIES and grain >= 2 and ore >= 3:
+            is_city = self.is_city
             acts += [
-                ("build_settlement", v)
-                for v in range(N_VERTEX)
-                if self._vertex_free(v) and self._touches_own_road(p, v)
+                ("build_city", v) for v in range(N_VERTEX) if building[v] == p and not is_city[v]
             ]
-        if pl.cities < MAX_CITIES and self._can_pay(p, COST["city"]):
-            acts += [
-                ("build_city", v)
-                for v in range(N_VERTEX)
-                if self.building[v] == p and not self.is_city[v]
-            ]
-        if self.dev_deck and self._can_pay(p, COST["dev"]):
+        if self.dev_deck and wool and grain and ore:
             acts.append(("buy_dev",))
-        if self._playable(p, KNIGHT):
-            acts.append(("knight",))
-        if self._playable(p, ROAD_BUILDING) and pl.roads < MAX_ROADS:
-            acts.append(("road_building",))
-        if self._playable(p, PLENTY):
-            acts += [
-                ("plenty", a, b)
-                for a in RESOURCES
-                for b in RESOURCES
-                if a <= b and self.bank[a] > 0 and self.bank[b] > (1 if a == b else 0)
-            ]
-        if self._playable(p, MONOPOLY):
-            acts += [("monopoly", r) for r in RESOURCES]
-        for give in RESOURCES:
-            ratio = self._trade_ratio(p, give)
-            if pl.hand[give] >= ratio:
+        if not self.dev_played and any(pl.dev):
+            if self._playable(p, KNIGHT):
+                acts.append(("knight",))
+            if self._playable(p, ROAD_BUILDING) and pl.roads < MAX_ROADS:
+                acts.append(("road_building",))
+            if self._playable(p, PLENTY):
                 acts += [
-                    ("trade", give, get) for get in RESOURCES if get != give and self.bank[get] > 0
+                    ("plenty", a, b)
+                    for a in RESOURCES
+                    for b in RESOURCES
+                    if a <= b and self.bank[a] > 0 and self.bank[b] > (1 if a == b else 0)
                 ]
+            if self._playable(p, MONOPOLY):
+                acts += [("monopoly", r) for r in RESOURCES]
+        hand = pl.hand
+        if max(hand) >= 2:
+            ratios = self._trade_ratios(p)
+            bank = self.bank
+            for give in RESOURCES:
+                if hand[give] >= ratios[give]:
+                    acts += [
+                        ("trade", give, get) for get in RESOURCES if get != give and bank[get] > 0
+                    ]
         return acts
 
     def _steal_targets(self) -> list[int]:
@@ -327,12 +395,12 @@ class Game:
             self._pay(p, COST["road"])
             self.road[a[1]] = p
             pl.roads += 1
-            self._update_longest()
+            self._update_longest(p)
         elif kind == "free_road":
             self.road[a[1]] = p
             pl.roads += 1
             self.free_roads -= 1
-            self._update_longest()
+            self._update_longest(p)
             if self.free_roads == 0 or not self.legal_actions():
                 self.free_roads = 0
                 self.phase = MAIN
@@ -429,20 +497,20 @@ class Game:
         銀行が足りない資源は、もらう人が1人だけなら残りを渡し、2人以上なら誰にも渡さない。
         """
         want = [[0] * 5 for _ in range(self.n)]
-        for v in range(N_VERTEX):
-            q = self.building[v]
-            if q == -1:
+        total = [0] * 5
+        building, is_city, robber = self.building, self.is_city, self.robber
+        for v, h, r in self.number_yield[d]:
+            q = building[v]
+            if q == -1 or h == robber:
                 continue
-            k = 2 if self.is_city[v] else 1
-            for h, r, num in self.vertex_yield[v]:
-                if num == d and h != self.robber:
-                    want[q][r] += k
+            k = 2 if is_city[v] else 1
+            want[q][r] += k
+            total[r] += k
         for r in RESOURCES:
-            total = sum(w[r] for w in want)
-            if total == 0:
+            if total[r] == 0:
                 continue
             takers = [q for q in range(self.n) if want[q][r]]
-            if total <= self.bank[r]:
+            if total[r] <= self.bank[r]:
                 for q in takers:
                     self._take_from_bank(q, r, want[q][r])
             elif len(takers) == 1:
@@ -450,30 +518,44 @@ class Game:
 
     # ---- 最長の道・最大の騎士 ----
     def road_length(self, p: int) -> int:
-        mine = {e for e in range(N_EDGE) if self.road[e] == p}
+        road, building = self.road, self.building
+        mine = [e for e in range(N_EDGE) if road[e] == p]
         if not mine:
             return 0
+        used = [False] * N_EDGE
 
-        def blocked(v: int) -> bool:
-            return self.building[v] not in (-1, p)
-
-        def dfs(v: int, used: set[int]) -> int:
+        def dfs(v: int) -> int:
             best = 0
-            for e in TOPO.vertex_edges[v]:
-                if e in mine and e not in used:
-                    a, b = TOPO.edges[e]
-                    u = b if a == v else a
-                    used.add(e)
-                    length = 1 + (0 if blocked(u) else dfs(u, used))
-                    used.discard(e)
-                    best = max(best, length)
+            for e, u in _VERTEX_STEPS[v]:
+                if road[e] == p and not used[e]:
+                    used[e] = True
+                    owner = building[u]
+                    length = 1 if owner != -1 and owner != p else 1 + dfs(u)
+                    used[e] = False
+                    if length > best:
+                        best = length
             return best
 
-        starts = {v for e in mine for v in TOPO.edges[e]}
-        return max(dfs(v, set()) for v in starts)
+        # 自分の道が触れている頂点すべてから数えて最大をとる（前の版と同じ数え方）
+        best = 0
+        seen = [False] * N_VERTEX
+        for e in mine:
+            for v in TOPO.edges[e]:
+                if not seen[v]:
+                    seen[v] = True
+                    d = dfs(v)
+                    if d > best:
+                        best = d
+        return best
 
-    def _update_longest(self) -> None:
-        self.longest_len = [self.road_length(q) for q in range(self.n)]
+    def _update_longest(self, only: int | None = None) -> None:
+        """最長の道を数え直す。only を渡すと、その人の長さだけ数え直す（ほかは変わらないとき）。"""
+        if only is None or not self.longest_fresh:
+            self.longest_len = [self.road_length(q) for q in range(self.n)]
+            # 初期配置の道は数え直さないので、最初の1回は全員を数える（前の版と同じ値にするため）
+            self.longest_fresh = True
+        else:
+            self.longest_len[only] = self.road_length(only)
         best = max(self.longest_len)
         h = self.longest_holder
         if best < LONGEST_MIN:
