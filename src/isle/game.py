@@ -65,6 +65,16 @@ _EDGE_ENDS = tuple(
 SETUP_SETTLE, SETUP_ROAD, PRE_ROLL, DISCARD, ROBBER, STEAL, MAIN, FREE_ROAD, OVER = range(9)
 
 
+class _NoRng:
+    """乱数を写さない写しに入れる目印。使われたら誤り（運の分け方を読み手が決めていない）。"""
+
+    def __getattr__(self, name):
+        raise RuntimeError("this clone has no rng (clone(keep_rng=False))")
+
+
+NO_RNG = _NoRng()
+
+
 @dataclass
 class Player:
     hand: list[int] = field(default_factory=lambda: [0] * 5)
@@ -135,12 +145,19 @@ class Game:
                 self.number_yield[num].append((v, h, r))
 
     # ---- 便利関数 ----
-    def clone(self) -> Game:
-        """探索用の写し。盤面の並べ方など変わらないものは共有し、変わるものだけ写す。"""
+    def clone(self, keep_rng: bool = True) -> Game:
+        """探索用の写し。盤面の並べ方など変わらないものは共有し、変わるものだけ写す。
+
+        keep_rng=False は乱数を写さない速い写し。出目・盗むカード・山札を自分で決める
+        読みの中だけで使う（写しの上で乱数を使うと RuntimeError）。
+        """
         g = Game.__new__(Game)
         g.__dict__.update(self.__dict__)
-        g.rng = random.Random()
-        g.rng.setstate(self.rng.getstate())
+        if keep_rng and self.rng is not NO_RNG:
+            g.rng = random.Random()
+            g.rng.setstate(self.rng.getstate())
+        else:
+            g.rng = NO_RNG
         g.players = [pl.copy() for pl in self.players]
         g.bank = list(self.bank)
         g.dev_deck = list(self.dev_deck)
@@ -475,8 +492,10 @@ class Game:
     def _after_robber(self) -> None:
         self.phase = MAIN if self.rolled else PRE_ROLL
 
-    def _roll(self) -> None:
-        d = self.rng.randint(1, 6) + self.rng.randint(1, 6)
+    def _roll(self, d: int | None = None) -> None:
+        """サイコロを振る。d を渡すとその出目にする（読み切りの解き手が出目ごとに分けるため）。"""
+        if d is None:
+            d = self.rng.randint(1, 6) + self.rng.randint(1, 6)
         self.last_roll = d
         self.rolled = True
         if d == 7:
