@@ -1,0 +1,11 @@
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 18px 0; }
+.kpi { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; display: grid; gap: 2px; }
+.kpi b { font-family: var(--font-display); font-size: 28px; color: var(--accent); }
+.kpi span { font-size: 14px; color: var(--muted); }
+.bars { display: grid; gap: 6px; margin: 12px 0; max-width: 560px; }
+.bar-row { display: grid; grid-template-columns: 7.5em 1fr 4.5em; gap: 10px; align-items: center; font-size: 14px; }
+.bar { position: relative; height: 14px; background: var(--soft); border-radius: 999px; }
+.bar .fill { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
+.bar .ref { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--warm); }
+.bar-val { text-align: right; font-variant-numeric: tabular-nums; }
+table.res td:not(:first-child), table.res th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>By the Numbers | Isle Routes</title>
+<meta name="description" content="Isle Routes measured from AI-vs-AI games: the first-seat advantage, how winners score, the longest road and largest army, and how the opening placement relates to winning.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap">
+<style>:root {
+  --bg: #eef3f4; --paper: #ffffff; --ink: #17262b; --muted: #55686e; --line: #cfdcdf;
+  --accent: #17708a; --accent-ink: #ffffff; --warm: #b5562d; --soft: #e2eef1;
+  --font-display: "Zen Maru Gothic", "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #10191c; --paper: #182428; --ink: #e3ecee; --muted: #9db0b5; --line: #2b3b40; --accent: #5cc0d8; --accent-ink: #0d1a1d; --warm: #e58a62; --soft: #1e3036; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #10191c; --paper: #182428; --ink: #e3ecee; --muted: #9db0b5; --line: #2b3b40; --accent: #5cc0d8; --accent-ink: #0d1a1d; --warm: #e58a62; --soft: #1e3036; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.8; padding: 0 16px 64px; }
+.wrap { max-width: 820px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.35; word-break: auto-phrase; }
+h1 { font-size: clamp(28px, 6vw, 40px); margin: 32px 0 8px; }
+h2 { font-size: 22px; margin: 40px 0 8px; }
+h3 { font-size: 18px; margin: 24px 0 4px; }
+a { color: var(--accent); }
+p, li { max-width: 40em; }
+.lede { color: var(--muted); margin-top: 0; }
+.note { font-size: 14px; color: var(--muted); }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 14px 0; }
+.lesson { border-left: 4px solid var(--accent); }
+.lesson .k { display: inline-block; font-weight: 700; color: var(--accent); margin-right: 6px; }
+table { border-collapse: collapse; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+.scroll { overflow-x: auto; }
+nav.site { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+nav.site .home { font-weight: 700; margin-right: 8px; color: var(--ink); text-decoration: none; }
+nav.site a.p { color: var(--muted); text-decoration: none; padding: 3px 10px; border-radius: 999px; }
+nav.site a.p:hover, nav.site a.p:focus-visible { color: var(--ink); background: var(--paper); outline: none; }
+nav.site a.p[aria-current="page"] { color: var(--accent-ink); background: var(--accent); }
+nav.site a.lang { margin-left: auto; border: 1px solid var(--line); }
+@media (pointer: coarse), (max-width: 600px) { nav.site a { min-height: 44px; display: inline-flex; align-items: center; } }
+footer.site { margin-top: 48px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 18px 0; }
+.kpi { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; display: grid; gap: 2px; }
+.kpi b { font-family: var(--font-display); font-size: 28px; color: var(--accent); }
+.kpi span { font-size: 14px; color: var(--muted); }
+.bars { display: grid; gap: 6px; margin: 12px 0; max-width: 560px; }
+.bar-row { display: grid; grid-template-columns: 7.5em 1fr 4.5em; gap: 10px; align-items: center; font-size: 14px; }
+.bar { position: relative; height: 14px; background: var(--soft); border-radius: 999px; }
+.bar .fill { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
+.bar .ref { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--warm); }
+.bar-val { text-align: right; font-variant-numeric: tabular-nums; }
+table.res td:not(:first-child), table.res th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+</style>
+<link rel="alternate" hreflang="ja" href="https://satou-aaaaa.github.io/isle-routes-research/stats.html"><link rel="alternate" hreflang="en" href="https://satou-aaaaa.github.io/isle-routes-research/en/stats.html"><link rel="alternate" hreflang="x-default" href="https://satou-aaaaa.github.io/isle-routes-research/en/stats.html">
+<script>(function(){var K="site-lang",cur="en",alt="../stats.html",s=null;try{s=localStorage.getItem(K)}catch(e){}if(!/bot|crawl|spider|slurp|lighthouse/i.test(navigator.userAgent)){var l=(navigator.languages&&navigator.languages[0])||navigator.language||'';var want=s||(/^ja\b/i.test(l)?'ja':'en');if(want!==cur){location.replace(alt+location.search+location.hash);return}}document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-lang]');if(a)try{localStorage.setItem(K,a.getAttribute('data-lang'))}catch(e){}})})();</script>
+</head>
+<body>
+<div class="wrap">
+<nav class="site" aria-label="Site pages"><a class="home" href="index.html">Isle Routes</a><a class="p" href="rules.html">Rules</a><a class="p" href="play.html">Play the AI</a><a class="p" href="stats.html" aria-current="page">By the Numbers</a><a class="p lang" href="../stats.html" hreflang="ja" lang="ja" data-lang="ja" title="日本語に切り替え">日本語</a></nav>
+<h1>Isle Routes by the Numbers</h1>
+<p class="lede">Four copies of this site's AI (Normal) played <b>10,000</b> games. We measured the first-seat advantage, how winners get their points, and how the opening placement relates to winning.</p>
+
+<div class="kpis">
+  <div class="kpi"><b>27.3%</b><span>Win rate of the 1st seat (25% would be even with four players)</span></div>
+  <div class="kpi"><b>92%</b><span>Winners holding the longest road or the largest army</span></div>
+  <div class="kpi"><b>+14.7 pts</b><span>Win-rate gap between players whose opening villages produce plenty of ore (5+ dots) and none</span></div>
+</div>
+
+<h2>1. Which seat has the edge?</h2>
+<p>Win rate by seat. The 1st seat won 27.3% (26.5%–28.2%), the most, and the 4th seat 23.5%.</p>
+<div class="bars"><div class="bar-row"><span class="bar-name">1st</span><span class="bar"><span class="fill" style="width:68.3%"></span><span class="ref" style="left:62.5%"></span></span><span class="bar-val">27.3%</span></div><div class="bar-row"><span class="bar-name">2nd</span><span class="bar"><span class="fill" style="width:63.2%"></span><span class="ref" style="left:62.5%"></span></span><span class="bar-val">25.3%</span></div><div class="bar-row"><span class="bar-name">3rd</span><span class="bar"><span class="fill" style="width:59.7%"></span><span class="ref" style="left:62.5%"></span></span><span class="bar-val">23.9%</span></div><div class="bar-row"><span class="bar-name">4th</span><span class="bar"><span class="fill" style="width:58.7%"></span><span class="ref" style="left:62.5%"></span></span><span class="bar-val">23.5%</span></div></div>
+<div class="box lesson"><span class="k">Takeaway</span>The 1st seat gets the best first spot and the earliest turns. The 4th seat places two villages in a row, so make up for it with a good combination (all resource types, a matching harbor).</div>
+
+<h2>2. Where do the winner's 10 points come from?</h2>
+<p>The winner's points, averaged by source (winners averaged 10.1 points, the others 5.8).</p>
+<div class="bars"><div class="bar-row"><span class="bar-name">Villages</span><span class="bar"><span class="fill" style="width:40.2%"></span></span><span class="bar-val">2.01 pts</span></div><div class="bar-row"><span class="bar-name">Towns</span><span class="bar"><span class="fill" style="width:86.8%"></span></span><span class="bar-val">4.34 pts</span></div><div class="bar-row"><span class="bar-name">Longest road</span><span class="bar"><span class="fill" style="width:29.6%"></span></span><span class="bar-val">1.48 pts</span></div><div class="bar-row"><span class="bar-name">Largest army</span><span class="bar"><span class="fill" style="width:18.0%"></span></span><span class="bar-val">0.90 pts</span></div><div class="bar-row"><span class="bar-name">Point cards</span><span class="bar"><span class="fill" style="width:27.0%"></span></span><span class="bar-val">1.35 pts</span></div></div>
+<div class="box lesson"><span class="k">Takeaway</span>Towns (2 points each) are the biggest source of points. Even after you run out of spots for villages, upgrading villages to towns keeps your score growing.</div>
+
+<h2>3. Longest road and largest army</h2>
+<p>Players holding the longest road at the end won <b>76.2%</b> of the time, and those with the largest army <b>51.1%</b>. Players with neither won only <b>3.3%</b>.</p>
+<div class="box lesson"><span class="k">Takeaway</span>Without the longest road or the largest army, winning is very hard (3.3%). Decide early whether you will take those 2 points by extending roads or by collecting knights.</div>
+
+<h2>4. Opening placement and winning</h2>
+<h3>How often your numbers roll (total dots)</h3>
+<p>Win rate by the total dots (rolls per 36) around the two opening villages. The average was 19.9 dots.</p>
+<div class="bars"><div class="bar-row"><span class="bar-name">16–18</span><span class="bar"><span class="fill" style="width:51.9%"></span><span class="ref" style="left:62.5%"></span></span><span class="bar-val">20.8%</span></div><div class="bar-row"><span class="bar-name">19–21</span><span class="bar"><span class="fill" style="width:64.3%"></span><span class="ref" style="left:62.5%"></span></span><span class="bar-val">25.7%</span></div><div class="bar-row"><span class="bar-name">22–24</span><span class="bar"><span class="fill" style="width:68.8%"></span><span class="ref" style="left:62.5%"></span></span><span class="bar-val">27.5%</span></div></div>
+<h3>Resource types</h3>
+<p>Players whose two opening villages produce all five resources won <b>29.0%</b>; those with four won <b>20.5%</b>.</p>
+<h3>By resource</h3>
+<p>Win rate of players with 5 or more dots of that resource (plenty) and with none.</p>
+<div class="scroll"><table class="res"><tr><th>Resource</th><th>Plenty</th><th>None</th></tr><tr><td>Wood</td><td>23.6%</td><td>23.9%</td></tr><tr><td>Brick</td><td>24.7%</td><td>21.8%</td></tr><tr><td>Wool</td><td>24.8%</td><td>23.5%</td></tr><tr><td>Grain</td><td>24.9%</td><td>16.9%</td></tr><tr><td>Ore</td><td>29.3%</td><td>14.6%</td></tr></table></div>
+<div class="box lesson"><span class="k">Takeaway</span>Beyond raw numbers, covering all five resources and picking spots that produce ore and grain matter (those build towns and development cards).</div>
+<h3>Harbors</h3>
+<p>Win rate with an opening village on a 2:1 harbor: 27.3%; on a 3:1 harbor: 24.3%; no harbor: 24.9%.</p>
+
+<h2>5. How games unfold</h2>
+<ul>
+  <li>A game lasted about <b>20 rounds</b> (each of the four players took about 20 turns).</li>
+  <li>A player who was the sole leader in visible points at the halfway mark went on to win <b>43.0%</b> of the time: better than one in four, but less than half hold on.</li>
+  <li>Winners bought 5.8 development cards on average, the others 4.7.</li>
+  <li>A 7 came up on 16.7% of rolls (the math says 1 in 6 = 16.7%).</li>
+</ul>
+
+<div class="box note-box">
+  <p class="note">Method: 10,000 games between four Normal AIs (one-move evaluation plus an exact search for wins available this turn). Boards, dice and the development deck are random. Ranges in parentheses are 95% intervals. These are AI-vs-AI numbers, so games between people may differ. The script is <a href="https://github.com/satou-aaaaa/isle-routes-research/blob/main/scripts/collect_stats.py">collect_stats.py</a>.</p>
+</div>
+<p>For the opening, try <a href="play.html">Play the AI</a> and press "What would the AI do?" to compare your choice with the AI's.</p>
+
+<footer class="site">"Isle Routes" is an original name made for this research project. The source code of the AI and these pages is on <a href="https://github.com/satou-aaaaa/isle-routes-research">GitHub</a>.</footer>
+</div>
+</body>
+</html>

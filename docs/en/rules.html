@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rules | Isle Routes</title>
+<meta name="description" content="How to play Isle Routes: the island and its resources, the opening placement, the turn, building costs, the 7 and the robber, trading, development cards and scoring.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap">
+<style>:root {
+  --bg: #eef3f4; --paper: #ffffff; --ink: #17262b; --muted: #55686e; --line: #cfdcdf;
+  --accent: #17708a; --accent-ink: #ffffff; --warm: #b5562d; --soft: #e2eef1;
+  --font-display: "Zen Maru Gothic", "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #10191c; --paper: #182428; --ink: #e3ecee; --muted: #9db0b5; --line: #2b3b40; --accent: #5cc0d8; --accent-ink: #0d1a1d; --warm: #e58a62; --soft: #1e3036; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #10191c; --paper: #182428; --ink: #e3ecee; --muted: #9db0b5; --line: #2b3b40; --accent: #5cc0d8; --accent-ink: #0d1a1d; --warm: #e58a62; --soft: #1e3036; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.8; padding: 0 16px 64px; }
+.wrap { max-width: 820px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.35; word-break: auto-phrase; }
+h1 { font-size: clamp(28px, 6vw, 40px); margin: 32px 0 8px; }
+h2 { font-size: 22px; margin: 40px 0 8px; }
+h3 { font-size: 18px; margin: 24px 0 4px; }
+a { color: var(--accent); }
+p, li { max-width: 40em; }
+.lede { color: var(--muted); margin-top: 0; }
+.note { font-size: 14px; color: var(--muted); }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 14px 0; }
+.lesson { border-left: 4px solid var(--accent); }
+.lesson .k { display: inline-block; font-weight: 700; color: var(--accent); margin-right: 6px; }
+table { border-collapse: collapse; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+.scroll { overflow-x: auto; }
+nav.site { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+nav.site .home { font-weight: 700; margin-right: 8px; color: var(--ink); text-decoration: none; }
+nav.site a.p { color: var(--muted); text-decoration: none; padding: 3px 10px; border-radius: 999px; }
+nav.site a.p:hover, nav.site a.p:focus-visible { color: var(--ink); background: var(--paper); outline: none; }
+nav.site a.p[aria-current="page"] { color: var(--accent-ink); background: var(--accent); }
+nav.site a.lang { margin-left: auto; border: 1px solid var(--line); }
+@media (pointer: coarse), (max-width: 600px) { nav.site a { min-height: 44px; display: inline-flex; align-items: center; } }
+footer.site { margin-top: 48px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.toc ol { margin: 0; padding-left: 1.4em; columns: 2; column-gap: 24px; }
+.toc li { break-inside: avoid; }
+.toc a { display: inline-block; padding: 10px 0; }
+@media (max-width: 480px) { .toc ol { columns: 1; } }
+</style>
+<link rel="alternate" hreflang="ja" href="https://satou-aaaaa.github.io/isle-routes-research/rules.html"><link rel="alternate" hreflang="en" href="https://satou-aaaaa.github.io/isle-routes-research/en/rules.html"><link rel="alternate" hreflang="x-default" href="https://satou-aaaaa.github.io/isle-routes-research/en/rules.html">
+<script>(function(){var K="site-lang",cur="en",alt="../rules.html",s=null;try{s=localStorage.getItem(K)}catch(e){}if(!/bot|crawl|spider|slurp|lighthouse/i.test(navigator.userAgent)){var l=(navigator.languages&&navigator.languages[0])||navigator.language||'';var want=s||(/^ja\b/i.test(l)?'ja':'en');if(want!==cur){location.replace(alt+location.search+location.hash);return}}document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-lang]');if(a)try{localStorage.setItem(K,a.getAttribute('data-lang'))}catch(e){}})})();</script>
+</head>
+<body>
+<div class="wrap">
+<nav class="site" aria-label="Site pages"><a class="home" href="index.html">Isle Routes</a><a class="p" href="rules.html" aria-current="page">Rules</a><a class="p" href="play.html">Play the AI</a><a class="p" href="stats.html">By the Numbers</a><a class="p lang" href="../rules.html" hreflang="ja" lang="ja" data-lang="ja" title="日本語に切り替え">日本語</a></nav>
+<h1>Rules</h1>
+<p class="lede">A short guide to Isle Routes for first-time players. When you are done, try it right away in <a href="play.html">Play the AI</a>.</p>
+
+<nav class="toc box" aria-label="Contents of this page">
+  <ol>
+    <li><a href="#goal">Goal</a></li>
+    <li><a href="#board">The island and resources</a></li>
+    <li><a href="#setup">Opening placement</a></li>
+    <li><a href="#turn">Your turn</a></li>
+    <li><a href="#build">Building</a></li>
+    <li><a href="#seven">The 7 and the robber</a></li>
+    <li><a href="#trade">Trading</a></li>
+    <li><a href="#dev">Development cards</a></li>
+    <li><a href="#points">Scoring</a></li>
+  </ol>
+</nav>
+
+<h2 id="goal">1. Goal</h2>
+<p>Four players gather resources and build roads, villages and towns. The first to reach <b>10 points during their own turn</b> wins.</p>
+
+<h2 id="board">2. The island and resources</h2>
+<p>The island is made of 19 hexagonal lands. Each land produces one kind of resource.</p>
+<div class="scroll">
+<table class="res-table">
+  <tr><th>Land</th><th>Produces</th><th>Count</th></tr>
+  <tr><td>🌲 Forest</td><td>Wood</td><td>4</td></tr>
+  <tr><td>🧱 Hills</td><td>Brick</td><td>3</td></tr>
+  <tr><td>🐑 Pasture</td><td>Wool</td><td>4</td></tr>
+  <tr><td>🌾 Fields</td><td>Grain</td><td>4</td></tr>
+  <tr><td>⛰️ Mountains</td><td>Ore</td><td>3</td></tr>
+  <tr><td>Desert</td><td>Nothing (the robber starts here)</td><td>1</td></tr>
+</table>
+</div>
+<p>Every land except the desert has a number from 2 to 12 (there is no 7). When the two dice add up to that number, villages and towns on the corners of that land receive its resource.</p>
+<div class="box lesson"><span class="k">Takeaway</span>6 and 8 roll the most often (5 times in 36), and 2 and 12 the least (once in 36). The dots under each number on the board show how many times in 36 rolls it comes up. You can roughly measure a village spot by adding up the dots around it.</div>
+
+<h2 id="setup">3. Opening placement</h2>
+<ol>
+  <li>In seat order from 1st to 4th, each player places one village and one road touching it.</li>
+  <li>Then, in reverse order from 4th to 1st, each player places a second village and road.</li>
+  <li>Each player takes one resource from every land around their second village, and the game begins.</li>
+</ol>
+<p>A village must be <b>at least two edges away</b> from every other village (never on a neighboring corner). This also applies during the game.</p>
+<div class="box lesson"><span class="k">Takeaway</span>Your two opening villages decide most of your income for the game. Compare the total dots, how many of the five resources you cover, and whether a harbor is nearby.</div>
+
+<h2 id="turn">4. Your turn</h2>
+<ol>
+  <li><b>Roll the dice</b>: every village next to a land with that number receives 1 resource, and every town 2 (this applies to all players).</li>
+  <li><b>Build, trade and play development cards</b> in any order, as often as you like (at most one development card per turn).</li>
+  <li><b>End your turn</b>: play passes to the next player.</li>
+</ol>
+
+<h2 id="build">5. Building</h2>
+<div class="scroll">
+<table class="cost">
+  <tr><th>Build</th><th>Cost</th><th>What it does</th></tr>
+  <tr><td>Road</td><td>🌲 wood + 🧱 brick</td><td>Extends from your road, village or town. Reach new spots for villages</td></tr>
+  <tr><td>Village (1 pt)</td><td>🌲 wood + 🧱 brick + 🐑 wool + 🌾 grain</td><td>Built on an empty corner your road reaches</td></tr>
+  <tr><td>Town (2 pts)</td><td>🌾 2 grain + ⛰️ 3 ore</td><td>Upgrades one of your villages. It then receives 2 resources per roll</td></tr>
+  <tr><td>Development card</td><td>🐑 wool + 🌾 grain + ⛰️ ore</td><td>Draw one from the deck (see below)</td></tr>
+</table>
+</div>
+<p class="note">Pieces are limited: 15 roads, 5 villages and 4 towns.</p>
+
+<h2 id="seven">6. The 7 and the robber</h2>
+<ul>
+  <li>On a 7, nobody receives resources.</li>
+  <li>Anyone holding <b>8 or more cards</b> discards half of them (rounded down).</li>
+  <li>The player who rolled moves the robber to another land and takes one random card from a player with a village or town on it.</li>
+  <li>A land with the robber on it produces nothing when its number is rolled.</li>
+</ul>
+<div class="box lesson"><span class="k">Takeaway</span>7 is the most common roll (6 times in 36). If you end your turn holding 8 or more cards, you risk losing half of them.</div>
+
+<h2 id="trade">7. Trading</h2>
+<p>On your turn you can trade <b>4 of the same resource for any 1 resource</b> with the bank. With a village or town on a harbor corner, you trade at that harbor's rate.</p>
+<ul>
+  <li>3:1 harbor: 3 of any one resource for 1.</li>
+  <li>2:1 harbor: 2 of its specific resource for 1.</li>
+</ul>
+<p class="note">Trading between players is not available on this site yet (bank and harbors only).</p>
+
+<h2 id="dev">8. Development cards</h2>
+<p>The deck has 25 cards. You cannot play a card on the turn you buy it (point cards count right away), and you may play at most one per turn.</p>
+<div class="scroll">
+<table>
+  <tr><th>Card</th><th>Count</th><th>Effect</th></tr>
+  <tr><td>Knight</td><td>14</td><td>Move the robber and take one card. Can be played before rolling</td></tr>
+  <tr><td>Point</td><td>5</td><td>Worth 1 point just by holding it (kept hidden)</td></tr>
+  <tr><td>Road building</td><td>2</td><td>Build two roads for free</td></tr>
+  <tr><td>Plenty</td><td>2</td><td>Take any two resources from the bank</td></tr>
+  <tr><td>Monopoly</td><td>2</td><td>Name a resource; every other player gives you all of theirs</td></tr>
+</table>
+</div>
+<div class="box lesson"><span class="k">Takeaway</span>At 9 points, buying a development card wins on the spot if it is a point card. In this site's research we found positions where the AI missed this and lost a lot of winning chances, and we fixed it.</div>
+
+<h2 id="points">9. Scoring</h2>
+<div class="scroll">
+<table>
+  <tr><th>Source</th><th>Points</th></tr>
+  <tr><td>Village</td><td>1</td></tr>
+  <tr><td>Town</td><td>2</td></tr>
+  <tr><td>Longest road (the longest connected road of at least 5; on a tie, the current holder keeps it)</td><td>2</td></tr>
+  <tr><td>Largest army (most knights played, at least 3)</td><td>2</td></tr>
+  <tr><td>Point card</td><td>1 each</td></tr>
+</table>
+</div>
+<p>Once you have the basics, try a game in <a href="play.html">Play the AI</a>. When unsure, press "What would the AI do?" to see the strong AI's suggestion.</p>
+
+<footer class="site">"Isle Routes" is an original name made for this research project. The source code of the AI and these pages is on <a href="https://github.com/satou-aaaaa/isle-routes-research">GitHub</a>.</footer>
+</div>
+</body>
+</html>

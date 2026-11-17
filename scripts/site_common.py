@@ -14,7 +14,9 @@ SITE_NAME = {"ja": "島の交易路", "en": "Isle Routes"}
 # (ファイル名, 日本語, 英語)。ナビに並べる順
 PAGES = [
     ("index.html", "トップ", "Home"),
+    ("rules.html", "ルール入門", "Rules"),
     ("play.html", "AIと対戦", "Play the AI"),
+    ("stats.html", "データで見る", "By the Numbers"),
 ]
 
 FONTS = (
