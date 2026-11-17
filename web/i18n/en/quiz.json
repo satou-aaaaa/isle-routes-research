@@ -1,0 +1,10 @@
+{
+ "初期配置クイズ | 島の交易路": "Opening Quiz | Isle Routes",
+ "はじめの村をどこに置くと勝ちやすい？ AIどうしの対局で確かめた答えで学ぶ「島の交易路」の初期配置クイズ。": "Where should your opening village go? An Isle Routes quiz with answers checked by AI-vs-AI games.",
+ "初期配置クイズ": "Opening Quiz",
+ "はじめの村をどこに置くかで、ゲームの大半の収入が決まります。A〜D のどこに置くと一番勝ちやすいか、AIどうしの対局で確かめた答えと比べてみましょう。": "Where you place your opening villages decides most of your income. Pick which of A–D wins most often, and compare with answers checked by AI-vs-AI games.",
+ "問題の盤面": "The quiz board",
+ "正解の決め方": "How the answers were decided",
+ "このサイトのAI（ふつう）4人で初期配置を進め、問題の場面で止めます。AIの評価で上位の置き場所それぞれについて、そこに村を置いてから最後までAIどうしで何百局も打ち、その席の勝率を比べました。選択肢は、一番勝った場所と、それより<b>はっきり</b>勝率が低かった場所（差が測り方のぶれの2倍以上）から選んでいます。": "Four Normal AIs play the opening up to the quiz position. For each of the AI's top-rated spots, we placed the village there and let the AIs play hundreds of games to the end, then compared that seat's win rate. The choices are the spot that won most and spots that won <b>clearly</b> less (by more than twice the measurement noise).",
+ "AIどうしの勝率なので、人どうしでは答えが変わることもあります。数字や資源の数の考え方は<a href=\"rules.html\">ルール入門</a>、全体の傾向は<a href=\"stats.html\">データで見る</a>にあります。": "These are AI-vs-AI win rates, so answers may differ between people. For how numbers and resources work see <a href=\"rules.html\">Rules</a>, and for overall trends see <a href=\"stats.html\">By the Numbers</a>."
+}

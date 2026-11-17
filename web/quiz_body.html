@@ -1,0 +1,16 @@
+<h1 id="qtop">初期配置クイズ</h1>
+<p class="lede">はじめの村をどこに置くかで、ゲームの大半の収入が決まります。A〜D のどこに置くと一番勝ちやすいか、AIどうしの対局で確かめた答えと比べてみましょう。</p>
+<section class="quiz">
+  <p class="qno" id="qno"></p>
+  <p class="qask" id="qask"></p>
+  <p class="qlegend note" id="qlegend"></p>
+  <svg id="qboard" viewBox="-6.4 -5.6 12.8 11.2" role="img" aria-label="問題の盤面"></svg>
+  <p class="note" id="qhint"></p>
+  <div id="qchoices" class="choices"></div>
+  <div id="qresult" hidden></div>
+</section>
+<details class="box">
+  <summary>正解の決め方</summary>
+  <p>このサイトのAI（ふつう）4人で初期配置を進め、問題の場面で止めます。AIの評価で上位の置き場所それぞれについて、そこに村を置いてから最後までAIどうしで何百局も打ち、その席の勝率を比べました。選択肢は、一番勝った場所と、それより<b>はっきり</b>勝率が低かった場所（差が測り方のぶれの2倍以上）から選んでいます。</p>
+  <p class="note">AIどうしの勝率なので、人どうしでは答えが変わることもあります。数字や資源の数の考え方は<a href="rules.html">ルール入門</a>、全体の傾向は<a href="stats.html">データで見る</a>にあります。</p>
+</details>

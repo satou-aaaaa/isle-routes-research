@@ -22,6 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import build_quiz  # noqa: E402
 import build_stats  # noqa: E402
 import i18n  # noqa: E402
 from site_common import FOOTER, nav_html, page  # noqa: E402
@@ -40,7 +41,7 @@ PY_FILES = (
     "webapi.py",
 )
 # docs/ 直下に写す JavaScript（両方の言語のページで共通）
-JS_FILES = ("play.js", "play_worker.js")
+JS_FILES = ("play.js", "play_worker.js", "quiz.js")
 
 
 def write_page(name: str, file: str, html_ja: str, fill=None) -> None:
@@ -130,6 +131,25 @@ def build_stats_page() -> None:
     write_page("stats", "stats.html", html, fill=build_stats.fill)
 
 
+def build_quiz_page() -> None:
+    (DOCS / "quiz_data.js").write_text(build_quiz.data_js(), encoding="utf-8")
+    html = page(
+        "quiz.html",
+        "初期配置クイズ",
+        "はじめの村をどこに置くと勝ちやすい？ AIどうしの対局で確かめた答えで学ぶ「島の交易路」の"
+        "初期配置クイズ。",
+        (WEB / "quiz_body.html").read_text(encoding="utf-8"),
+        css=(WEB / "quiz.css").read_text(encoding="utf-8"),
+        tail='<script src="quiz_data.js"></script>\n<script src="quiz.js"></script>\n',
+    )
+    write_page("quiz", "quiz.html", html)
+    en = DOCS / "en" / "quiz.html"
+    text = en.read_text(encoding="utf-8")
+    for js in ("quiz_data.js", "quiz.js"):
+        text = text.replace(f'<script src="{js}">', f'<script src="../{js}">')
+    en.write_text(text, "utf-8")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="作り直して git の差分がなければ成功")
@@ -139,6 +159,7 @@ def main() -> None:
     build_rules()
     build_play()
     build_stats_page()
+    build_quiz_page()
     if args.check:
         r = subprocess.run(
             ["git", "status", "--porcelain", "--", "docs/"],
