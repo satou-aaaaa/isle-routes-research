@@ -1,0 +1,6 @@
+.hero h1 span { color: var(--accent); display: block; }
+ol.cards { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 12px; }
+ol.cards a { display: grid; gap: 2px; padding: 16px 18px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); text-decoration: none; }
+ol.cards a:hover, ol.cards a:focus-visible { border-color: var(--accent); outline: none; }
+ol.cards b { font-size: 18px; }
+ol.cards small { color: var(--muted); font-size: 14px; }

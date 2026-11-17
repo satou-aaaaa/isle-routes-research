@@ -15,6 +15,12 @@ markers = ["slow: 時間のかかる強さの検証（scripts/check.py --quick �
 
 [tool.ruff]
 line-length = 100
+# docs/py/ は src/isle の写し（scripts/build_pages.py が作る）
+extend-exclude = ["docs/py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# 姉妹プロジェクトから写した多言語化の部品（長い文と正規表現をそのまま持つ）
+"scripts/i18n.py" = ["E501"]

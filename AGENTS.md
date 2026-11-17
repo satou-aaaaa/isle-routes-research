@@ -18,6 +18,12 @@ python scripts/check.py --quick   # ruff・整形・slow 以外のテスト
 
 このリポジトリだけの PR の決まりは `.claude/skills/steward/SKILL.md`（共通の手順より優先）。
 
+## 公開サイト
+
+- GitHub Pages は `main` の `/docs` を公開する。`docs/*.html`・`docs/en/`・`docs/py/` は `python scripts/build_pages.py` で作り直す（手で直さない）。
+- 対戦ページの AI は `src/isle` をブラウザの Python（Pyodide）でそのまま動かす。ルールや AI を変えたら作り直す。
+- 日本語の文を変えたら対訳表 `web/i18n/en/<ページ>.json` も直す。ページを変えたら毎回スマホ幅・PC幅で点検する（`.claude/skills/ui-check/SKILL.md`）。
+
 ## 名前と権利（必ず守る）
 
 - 市販ゲームの名前・絵・カード名・ルール文を、コード・画面・README・コミットの題に使わない（NOTICE.md）。

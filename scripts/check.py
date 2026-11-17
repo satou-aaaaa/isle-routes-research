@@ -1,6 +1,6 @@
 """PRを出す前・マージする前の確認を1コマンドで行う（CIも同じものを実行する）。
 
-python scripts/check.py           # lint・整形・全テスト
+python scripts/check.py           # lint・整形・公開ページ・全テスト
 python scripts/check.py --quick   # 時間のかかる強さの検証（@pytest.mark.slow）を飛ばす
 python scripts/check.py --fix     # 先に ruff の自動修正と整形をかけてから確認する
 """
@@ -36,6 +36,9 @@ def main() -> None:
         step("ruff 整形", [PY, "-m", "ruff", "format", "."])
     step("ruff", [PY, "-m", "ruff", "check", "."])
     step("ruff 整形の確認", [PY, "-m", "ruff", "format", "--check", "."])
+    # docs/ は scripts/build_pages.py が作る（対戦ページの Python は src/isle の写し）。
+    # 古いままなら止める
+    step("公開ページ", [PY, "scripts/build_pages.py", "--check"])
     test = [PY, "-m", "pytest", "-q"] + (["-m", "not slow"] if args.quick else [])
     step("pytest" + ("（slow を除く）" if args.quick else ""), test)
     print("すべて通りました")

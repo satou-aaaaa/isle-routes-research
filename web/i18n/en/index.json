@@ -1,0 +1,10 @@
+{
+ "島の交易路 ― 強いAIと学ぶ資源と開拓のゲーム": "Isle Routes — learn a resource-and-settling game with a strong AI",
+ "六角形の島で資源を集め、道・村・街を建てて10点を目指す4人ゲーム「島の交易路」。研究中の強いAIと対戦して、序盤の置き方や終盤の決め方を学べます。": "Isle Routes is a four-player game where you gather resources on a hexagonal island and build roads, villages and towns to reach 10 points. Play against a strong research AI and learn how to open and how to close out a game.",
+ "強いAIと学ぶ<span>島の交易路</span>": "Learn <span>Isle Routes</span> with a strong AI",
+ "六角形の島で木材・れんが・羊毛・小麦・鉱石を集め、道・村・街を建てて先に10点を取る4人ゲーム。このサイトでは、研究中の強いAIと対戦しながら、序盤の置き方や終盤の決め方を学べます。": "A four-player game where you gather wood, brick, wool, grain and ore on a hexagonal island and build roads, villages and towns to be the first to 10 points. On this site you can play against a strong research AI and learn where to settle early and how to finish the game.",
+ "<a href=\"play.html\"><b>AIと対戦</b><small>AI3人と4人で遊ぶ。迷ったらAIのおすすめの手と、勝ちやすさの見立てを見られます。</small></a>": "<a href=\"play.html\"><b>Play the AI</b><small>Play a four-player game against three AIs. When unsure, see the move the AI recommends and its estimate of everyone's chances.</small></a>",
+ "このサイトのAI": "The AI on this site",
+ "評価関数で1手先を見る「貪欲AI」に、この手番で勝てる筋を全部調べる読み切りを足したものが「ふつう」、サイコロや見えないカードを何通りも引いて先を読む探索（MCTS）が「強い」です。研究の記録は <a href=\"https://github.com/satou-aaaaa/isle-routes-research/blob/main/docs/EXPERIMENTS.md\">EXPERIMENTS.md</a> にあります。": "\"Normal\" is a greedy AI that looks one move ahead with an evaluation function, plus an exact search that never misses a win available this turn. \"Strong\" adds a search (MCTS) that samples dice rolls and hidden cards many times to look ahead. The research log is in <a href=\"https://github.com/satou-aaaaa/isle-routes-research/blob/main/docs/EXPERIMENTS.md\">EXPERIMENTS.md</a> (Japanese).",
+ "「島の交易路」は、資源を集めて開拓する定番の4人ゲームの基本ルールに沿って作った、この研究のためのオリジナルの名前・絵です。プレイヤーどうしの交換はまだなく、銀行と港との交換だけです。": "\"Isle Routes\" uses an original name and artwork made for this research, following the basic rules of the classic four-player resource-and-settling genre. Trading between players is not supported yet; you can trade with the bank and harbors only."
+}
