@@ -12,10 +12,12 @@ description: このリポジトリでPRを作る・直す・CIを通す・マー
    - lint や整形で落ちたら `python scripts/check.py --fix --quick` で直してから見直す。
    - ルールエンジン（`src/isle/`）を触ったときは `--quick` を付けずに全テストを回し、
      `python scripts/random_games.py --games 500` でも止まらず終わるかを見る。
-2. 市販ゲームの名前・カード名を、コード・画面・README・コミットの題に書いていないかを見る（NOTICE.md）。
+2. 公開ページ（`web/`・`scripts/build_pages.py`・`src/isle/`）を触ったら `python scripts/build_pages.py` で docs/ を作り直し、
+   `.claude/skills/ui-check/SKILL.md` の点検（`node scripts/ui_check.mjs`）をする。`src/isle` を変えると対戦ページの写し（docs/py/）も変わる。
+3. 市販ゲームの名前・カード名を、コード・画面・README・コミットの題に書いていないかを見る（NOTICE.md）。
 
 ## CI
-- `.github/workflows/test.yml` が `python scripts/check.py`（全テスト込み）と actionlint を実行する。
+- `.github/workflows/test.yml` が `python scripts/check.py`（公開ページの作り直しの確認・全テスト込み）、UI 点検（`ui` ジョブ）と actionlint を実行する。
 - 落ちたら、ローカルで同じ `scripts/check.py` を再現してから直す。テストを飛ばしたり無効にしたりしない。
 
 ## マージ

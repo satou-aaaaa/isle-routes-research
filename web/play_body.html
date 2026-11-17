@@ -1,0 +1,74 @@
+<h1>AIと対戦</h1>
+<p class="lede">研究中のAI3人と4人で遊びます。迷ったら「AIならどう打つ？」で、強いAIのおすすめの手を見られます。</p>
+
+<section id="setup" class="box">
+  <h2 class="sr">対局の設定</h2>
+  <label class="field">AIの強さ
+    <select id="level">
+      <option value="normal" selected>ふつう（1手先の評価＋勝ち筋読み）</option>
+      <option value="strong">強い（サイコロを引いて読む探索）</option>
+    </select>
+  </label>
+  <label class="field">あなたの席
+    <select id="seat">
+      <option value="0" selected>1番手</option>
+      <option value="1">2番手</option>
+      <option value="2">3番手</option>
+      <option value="3">4番手</option>
+      <option value="random">おまかせ</option>
+    </select>
+  </label>
+  <button type="button" id="start" class="primary">対局を始める</button>
+  <p class="note">AIはブラウザの中で動きます（研究と同じ Python のプログラムを使っています）。初回は読み込みに20秒ほどかかります。</p>
+</section>
+
+<section id="game" hidden>
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+  <div class="layout">
+    <div class="board-col">
+      <svg id="board" viewBox="-6.4 -5.6 12.8 11.2" role="img" aria-label="島の盤面"></svg>
+      <div id="actions" class="actions"></div>
+      <p id="hint-out" class="hint-out" aria-live="polite"></p>
+    <div class="box tight">
+        <p class="lbl">あなたの手札</p>
+        <div id="hand" class="hand"></div>
+        <div id="devs" class="devs"></div>
+      </div>
+    </div>
+    <div class="side-col">
+      <div id="players" class="players"></div>
+      <div class="box tight">
+        <p class="lbl">AIの見立て（勝ちやすさの目安）</p>
+        <div id="chances"></div>
+      </div>
+      <details class="box tight" open>
+        <summary class="lbl">これまでの流れ</summary>
+        <ol id="log" class="log"></ol>
+      </details>
+      <div class="row small">
+        <label>AIの速さ
+          <select id="speed">
+            <option value="700">ゆっくり</option>
+            <option value="350" selected>ふつう</option>
+            <option value="80">速い</option>
+          </select>
+        </label>
+        <button type="button" id="restart" class="ghost">新しい対局</button>
+      </div>
+    </div>
+  </div>
+  <section id="over" class="box over" hidden></section>
+</section>
+
+<details class="box">
+  <summary>遊び方の早見</summary>
+  <ul>
+    <li>はじめに村と道を2組ずつ置きます（1→4番手、4→1番手の順）。2つ目の村のまわりの資源を1枚ずつもらいます。</li>
+    <li>手番はサイコロから。出た数字の土地に接する村は1枚、街は2枚の資源をもらいます。</li>
+    <li>道＝木材＋れんが、村＝木材＋れんが＋羊毛＋小麦、街＝小麦2＋鉱石3、発展カード＝羊毛＋小麦＋鉱石。</li>
+    <li>7が出たら、8枚以上持つ人は半分を捨て、出した人が盗賊を動かして隣の人から1枚奪います。</li>
+    <li>銀行とは4枚を1枚に交換できます。港に村があると3:1や2:1になります。</li>
+    <li>自分の手番に10点で勝ち。村1点・街2点・最長の道2点・最大の騎士2点・得点カード1点。</li>
+  </ul>
+  <p class="note">盤の上の丸は今置ける場所です。押すと決定のボタンが出ます。数字の下の点は出やすさ（6と8が一番出やすい）。</p>
+</details>

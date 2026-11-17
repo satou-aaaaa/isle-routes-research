@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>島の交易路 ― 強いAIと学ぶ資源と開拓のゲーム</title>
+<meta name="description" content="六角形の島で資源を集め、道・村・街を建てて10点を目指す4人ゲーム「島の交易路」。研究中の強いAIと対戦して、序盤の置き方や終盤の決め方を学べます。">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap">
+<style>:root {
+  --bg: #eef3f4; --paper: #ffffff; --ink: #17262b; --muted: #55686e; --line: #cfdcdf;
+  --accent: #17708a; --accent-ink: #ffffff; --warm: #b5562d; --soft: #e2eef1;
+  --font-display: "Zen Maru Gothic", "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #10191c; --paper: #182428; --ink: #e3ecee; --muted: #9db0b5; --line: #2b3b40; --accent: #5cc0d8; --accent-ink: #0d1a1d; --warm: #e58a62; --soft: #1e3036; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #10191c; --paper: #182428; --ink: #e3ecee; --muted: #9db0b5; --line: #2b3b40; --accent: #5cc0d8; --accent-ink: #0d1a1d; --warm: #e58a62; --soft: #1e3036; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.8; padding: 0 16px 64px; }
+.wrap { max-width: 820px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.35; word-break: auto-phrase; }
+h1 { font-size: clamp(28px, 6vw, 40px); margin: 32px 0 8px; }
+h2 { font-size: 22px; margin: 40px 0 8px; }
+h3 { font-size: 18px; margin: 24px 0 4px; }
+a { color: var(--accent); }
+p, li { max-width: 40em; }
+.lede { color: var(--muted); margin-top: 0; }
+.note { font-size: 14px; color: var(--muted); }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 14px 0; }
+.lesson { border-left: 4px solid var(--accent); }
+.lesson .k { display: inline-block; font-weight: 700; color: var(--accent); margin-right: 6px; }
+table { border-collapse: collapse; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+.scroll { overflow-x: auto; }
+nav.site { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+nav.site .home { font-weight: 700; margin-right: 8px; color: var(--ink); text-decoration: none; }
+nav.site a.p { color: var(--muted); text-decoration: none; padding: 3px 10px; border-radius: 999px; }
+nav.site a.p:hover, nav.site a.p:focus-visible { color: var(--ink); background: var(--paper); outline: none; }
+nav.site a.p[aria-current="page"] { color: var(--accent-ink); background: var(--accent); }
+nav.site a.lang { margin-left: auto; border: 1px solid var(--line); }
+@media (pointer: coarse), (max-width: 600px) { nav.site a { min-height: 44px; display: inline-flex; align-items: center; } }
+footer.site { margin-top: 48px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.hero h1 span { color: var(--accent); display: block; }
+ol.cards { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 12px; }
+ol.cards a { display: grid; gap: 2px; padding: 16px 18px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); text-decoration: none; }
+ol.cards a:hover, ol.cards a:focus-visible { border-color: var(--accent); outline: none; }
+ol.cards b { font-size: 18px; }
+ol.cards small { color: var(--muted); font-size: 14px; }
+</style>
+<link rel="alternate" hreflang="ja" href="https://satou-aaaaa.github.io/isle-routes-research/"><link rel="alternate" hreflang="en" href="https://satou-aaaaa.github.io/isle-routes-research/en/"><link rel="alternate" hreflang="x-default" href="https://satou-aaaaa.github.io/isle-routes-research/en/">
+<script>(function(){var K="site-lang",cur="ja",alt="en/index.html",s=null;try{s=localStorage.getItem(K)}catch(e){}if(!/bot|crawl|spider|slurp|lighthouse/i.test(navigator.userAgent)){var l=(navigator.languages&&navigator.languages[0])||navigator.language||'';var want=s||(/^ja\b/i.test(l)?'ja':'en');if(want!==cur){location.replace(alt+location.search+location.hash);return}}document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-lang]');if(a)try{localStorage.setItem(K,a.getAttribute('data-lang'))}catch(e){}})})();</script>
+</head>
+<body>
+<div class="wrap">
+<nav class="site" aria-label="サイト内のページ"><a class="home" href="index.html">島の交易路</a><a class="p" href="play.html">AIと対戦</a><a class="p lang" href="en/index.html" hreflang="en" lang="en" data-lang="en" title="Switch to English">English</a></nav>
+<header class="hero">
+  <h1>強いAIと学ぶ<span>島の交易路</span></h1>
+  <p class="lede">六角形の島で木材・れんが・羊毛・小麦・鉱石を集め、道・村・街を建てて先に10点を取る4人ゲーム。このサイトでは、研究中の強いAIと対戦しながら、序盤の置き方や終盤の決め方を学べます。</p>
+</header>
+<ol class="cards">
+  <li><a href="play.html"><b>AIと対戦</b><small>AI3人と4人で遊ぶ。迷ったらAIのおすすめの手と、勝ちやすさの見立てを見られます。</small></a></li>
+</ol>
+<h2>このサイトのAI</h2>
+<p>評価関数で1手先を見る「貪欲AI」に、この手番で勝てる筋を全部調べる読み切りを足したものが「ふつう」、サイコロや見えないカードを何通りも引いて先を読む探索（MCTS）が「強い」です。研究の記録は <a href="https://github.com/satou-aaaaa/isle-routes-research/blob/main/docs/EXPERIMENTS.md">EXPERIMENTS.md</a> にあります。</p>
+<p class="note">「島の交易路」は、資源を集めて開拓する定番の4人ゲームの基本ルールに沿って作った、この研究のためのオリジナルの名前・絵です。プレイヤーどうしの交換はまだなく、銀行と港との交換だけです。</p>
+
+<footer class="site">「島の交易路」はこの研究のためのオリジナルの名前です。AI とページのソースは <a href="https://github.com/satou-aaaaa/isle-routes-research">GitHub</a> にあります。</footer>
+</div>
+</body>
+</html>
