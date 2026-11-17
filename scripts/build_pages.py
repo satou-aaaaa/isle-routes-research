@@ -22,6 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import build_stats  # noqa: E402
 import i18n  # noqa: E402
 from site_common import FOOTER, nav_html, page  # noqa: E402
 
@@ -42,7 +43,12 @@ PY_FILES = (
 JS_FILES = ("play.js", "play_worker.js")
 
 
-def write_page(name: str, file: str, html_ja: str) -> None:
+def write_page(name: str, file: str, html_ja: str, fill=None) -> None:
+    """日本語ページから英語ページを作って書き出す。
+
+    fill(html, lang) を渡すと、訳したあとで {{名前}} を言語ごとの値に置き換える（数字の入る文は
+    対訳表に {{名前}} のまま載せ、集計が変わっても訳が古くならないようにする）。
+    """
     html_en = i18n.to_english_page(
         html_ja.replace(FOOTER["ja"], FOOTER["en"]),
         file,
@@ -50,6 +56,8 @@ def write_page(name: str, file: str, html_ja: str) -> None:
         nav_ja=nav_html(file, "ja"),
         nav_en=nav_html(file, "en"),
     )
+    if fill:
+        html_ja, html_en = fill(html_ja, "ja"), fill(html_en, "en")
     i18n.write_pair(file, html_ja, html_en)
 
 
@@ -98,13 +106,39 @@ def build_play() -> None:
     en.write_text(text.replace('<script src="play.js">', '<script src="../play.js">'), "utf-8")
 
 
+def build_rules() -> None:
+    html = page(
+        "rules.html",
+        "ルール入門",
+        "「島の交易路」の遊び方: 島と資源、はじめの置き方、手番の流れ、建てるものの費用、7と盗賊、"
+        "交換、発展カード、点の数え方。",
+        (WEB / "rules_body.html").read_text(encoding="utf-8"),
+        css=(WEB / "rules.css").read_text(encoding="utf-8"),
+    )
+    write_page("rules", "rules.html", html)
+
+
+def build_stats_page() -> None:
+    html = page(
+        "stats.html",
+        "データで見る",
+        "AI どうしの対局から測った「島の交易路」の数字: 先手の有利さ、勝つ人の点の取り方、"
+        "最長の道と最大の騎士、はじめの置き方と勝ちやすさ。",
+        (WEB / "stats_body.html").read_text(encoding="utf-8"),
+        css=(WEB / "stats.css").read_text(encoding="utf-8"),
+    )
+    write_page("stats", "stats.html", html, fill=build_stats.fill)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="作り直して git の差分がなければ成功")
     args = ap.parse_args()
     copy_engine()
     build_index()
+    build_rules()
     build_play()
+    build_stats_page()
     if args.check:
         r = subprocess.run(
             ["git", "status", "--porcelain", "--", "docs/"],

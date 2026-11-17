@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ルール入門 | 島の交易路</title>
+<meta name="description" content="「島の交易路」の遊び方: 島と資源、はじめの置き方、手番の流れ、建てるものの費用、7と盗賊、交換、発展カード、点の数え方。">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap">
+<style>:root {
+  --bg: #eef3f4; --paper: #ffffff; --ink: #17262b; --muted: #55686e; --line: #cfdcdf;
+  --accent: #17708a; --accent-ink: #ffffff; --warm: #b5562d; --soft: #e2eef1;
+  --font-display: "Zen Maru Gothic", "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #10191c; --paper: #182428; --ink: #e3ecee; --muted: #9db0b5; --line: #2b3b40; --accent: #5cc0d8; --accent-ink: #0d1a1d; --warm: #e58a62; --soft: #1e3036; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #10191c; --paper: #182428; --ink: #e3ecee; --muted: #9db0b5; --line: #2b3b40; --accent: #5cc0d8; --accent-ink: #0d1a1d; --warm: #e58a62; --soft: #1e3036; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.8; padding: 0 16px 64px; }
+.wrap { max-width: 820px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.35; word-break: auto-phrase; }
+h1 { font-size: clamp(28px, 6vw, 40px); margin: 32px 0 8px; }
+h2 { font-size: 22px; margin: 40px 0 8px; }
+h3 { font-size: 18px; margin: 24px 0 4px; }
+a { color: var(--accent); }
+p, li { max-width: 40em; }
+.lede { color: var(--muted); margin-top: 0; }
+.note { font-size: 14px; color: var(--muted); }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 14px 0; }
+.lesson { border-left: 4px solid var(--accent); }
+.lesson .k { display: inline-block; font-weight: 700; color: var(--accent); margin-right: 6px; }
+table { border-collapse: collapse; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+.scroll { overflow-x: auto; }
+nav.site { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+nav.site .home { font-weight: 700; margin-right: 8px; color: var(--ink); text-decoration: none; }
+nav.site a.p { color: var(--muted); text-decoration: none; padding: 3px 10px; border-radius: 999px; }
+nav.site a.p:hover, nav.site a.p:focus-visible { color: var(--ink); background: var(--paper); outline: none; }
+nav.site a.p[aria-current="page"] { color: var(--accent-ink); background: var(--accent); }
+nav.site a.lang { margin-left: auto; border: 1px solid var(--line); }
+@media (pointer: coarse), (max-width: 600px) { nav.site a { min-height: 44px; display: inline-flex; align-items: center; } }
+footer.site { margin-top: 48px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.toc ol { margin: 0; padding-left: 1.4em; columns: 2; column-gap: 24px; }
+.toc li { break-inside: avoid; }
+.toc a { display: inline-block; padding: 10px 0; }
+@media (max-width: 480px) { .toc ol { columns: 1; } }
+</style>
+<link rel="alternate" hreflang="ja" href="https://satou-aaaaa.github.io/isle-routes-research/rules.html"><link rel="alternate" hreflang="en" href="https://satou-aaaaa.github.io/isle-routes-research/en/rules.html"><link rel="alternate" hreflang="x-default" href="https://satou-aaaaa.github.io/isle-routes-research/en/rules.html">
+<script>(function(){var K="site-lang",cur="ja",alt="en/rules.html",s=null;try{s=localStorage.getItem(K)}catch(e){}if(!/bot|crawl|spider|slurp|lighthouse/i.test(navigator.userAgent)){var l=(navigator.languages&&navigator.languages[0])||navigator.language||'';var want=s||(/^ja\b/i.test(l)?'ja':'en');if(want!==cur){location.replace(alt+location.search+location.hash);return}}document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-lang]');if(a)try{localStorage.setItem(K,a.getAttribute('data-lang'))}catch(e){}})})();</script>
+</head>
+<body>
+<div class="wrap">
+<nav class="site" aria-label="サイト内のページ"><a class="home" href="index.html">島の交易路</a><a class="p" href="rules.html" aria-current="page">ルール入門</a><a class="p" href="play.html">AIと対戦</a><a class="p" href="stats.html">データで見る</a><a class="p lang" href="en/rules.html" hreflang="en" lang="en" data-lang="en" title="Switch to English">English</a></nav>
+<h1>ルール入門</h1>
+<p class="lede">はじめての人向けに、「島の交易路」の遊び方を短くまとめました。読み終えたら、そのまま<a href="play.html">AIと対戦</a>で試せます。</p>
+
+<nav class="toc box" aria-label="このページの目次">
+  <ol>
+    <li><a href="#goal">目的</a></li>
+    <li><a href="#board">島と資源</a></li>
+    <li><a href="#setup">はじめの置き方</a></li>
+    <li><a href="#turn">手番の流れ</a></li>
+    <li><a href="#build">建てるもの</a></li>
+    <li><a href="#seven">7と盗賊</a></li>
+    <li><a href="#trade">交換</a></li>
+    <li><a href="#dev">発展カード</a></li>
+    <li><a href="#points">点の数え方</a></li>
+  </ol>
+</nav>
+
+<h2 id="goal">1. 目的</h2>
+<p>4人で遊びます。資源を集めて道・村・街を建て、<b>自分の手番のあいだに10点</b>に届いた人が勝ちです。</p>
+
+<h2 id="board">2. 島と資源</h2>
+<p>島は19枚の六角形の土地でできています。土地ごとに出る資源が決まっています。</p>
+<div class="scroll">
+<table class="res-table">
+  <tr><th>土地</th><th>出る資源</th><th>枚数</th></tr>
+  <tr><td>🌲 森</td><td>木材</td><td>4</td></tr>
+  <tr><td>🧱 丘</td><td>れんが</td><td>3</td></tr>
+  <tr><td>🐑 牧草地</td><td>羊毛</td><td>4</td></tr>
+  <tr><td>🌾 畑</td><td>小麦</td><td>4</td></tr>
+  <tr><td>⛰️ 山</td><td>鉱石</td><td>3</td></tr>
+  <tr><td>砂漠</td><td>なし（盗賊が最初にいる）</td><td>1</td></tr>
+</table>
+</div>
+<p>砂漠以外の土地には2〜12の数字が置かれています（7はありません）。サイコロ2つの合計がその数字のとき、その土地の角にある村と街が資源をもらいます。</p>
+<div class="box lesson"><span class="k">学び</span>数字の出やすさは、6と8が一番（36回に5回）、2と12が一番出にくい（36回に1回）です。盤の数字の下の点の数が、36回あたりに出る回数です。村の価値は、まわりの点の合計でおおよそ測れます。</div>
+
+<h2 id="setup">3. はじめの置き方</h2>
+<ol>
+  <li>1番手から4番手の順に、村を1つと、その村につながる道を1本置きます。</li>
+  <li>次に4番手から1番手の逆の順に、もう1組の村と道を置きます。</li>
+  <li>2つ目の村のまわりの土地から、資源を1枚ずつもらってゲームが始まります。</li>
+</ol>
+<p>村はどの村からも<b>2辺以上</b>離して置きます（隣の角には置けません）。これはゲーム中も同じです。</p>
+<div class="box lesson"><span class="k">学び</span>はじめの2つの村で、ゲームの大半の収入が決まります。点の合計が多いこと、5種類の資源がなるべくそろうこと、近くに港があることを比べて選びましょう。</div>
+
+<h2 id="turn">4. 手番の流れ</h2>
+<ol>
+  <li><b>サイコロを振る</b>: 出た数字の土地に接する村は1枚、街は2枚の資源をもらいます（全員がもらえます）。</li>
+  <li><b>建てる・交換する・発展カードを使う</b>: 好きな順で、何回でもできます（発展カードは1手番に1枚まで）。</li>
+  <li><b>手番を終える</b>: 左隣の人の番になります。</li>
+</ol>
+
+<h2 id="build">5. 建てるもの</h2>
+<div class="scroll">
+<table class="cost">
+  <tr><th>建てるもの</th><th>費用</th><th>できること</th></tr>
+  <tr><td>道</td><td>🌲木材＋🧱れんが</td><td>自分の道・村・街から延ばす。村を建てる場所まで届かせる</td></tr>
+  <tr><td>村（1点）</td><td>🌲木材＋🧱れんが＋🐑羊毛＋🌾小麦</td><td>自分の道がつながった空き角に建てる</td></tr>
+  <tr><td>街（2点）</td><td>🌾小麦2＋⛰️鉱石3</td><td>自分の村を建て替える。資源が2枚ずつになる</td></tr>
+  <tr><td>発展カード</td><td>🐑羊毛＋🌾小麦＋⛰️鉱石</td><td>山から1枚引く（下を参照）</td></tr>
+</table>
+</div>
+<p class="note">駒には上限があります: 道15本・村5つ・街4つ。</p>
+
+<h2 id="seven">6. 7と盗賊</h2>
+<ul>
+  <li>7が出たら、だれも資源をもらえません。</li>
+  <li>手札が<b>8枚以上</b>の人は、半分（切り捨て）を捨てます。</li>
+  <li>振った人は盗賊を別の土地へ動かし、その土地に村か街を持つ人から1枚を無作為に奪います。</li>
+  <li>盗賊のいる土地は、数字が出ても資源を出しません。</li>
+</ul>
+<div class="box lesson"><span class="k">学び</span>7はいちばん出やすい目（36回に6回）です。手札を8枚以上ためたまま手番を終えると、半分を失うおそれがあります。</div>
+
+<h2 id="trade">7. 交換</h2>
+<p>自分の手番に、銀行と<b>同じ資源4枚を好きな資源1枚</b>に交換できます。港の角に村か街があると、その港の比率で交換できます。</p>
+<ul>
+  <li>3:1 の港: どの資源でも3枚を1枚に。</li>
+  <li>2:1 の港: 決まった1種類の資源を2枚で1枚に。</li>
+</ul>
+<p class="note">このサイトでは、プレイヤーどうしの交換はまだできません（銀行と港だけ）。</p>
+
+<h2 id="dev">8. 発展カード</h2>
+<p>山は25枚。買った手番には使えず（得点カードは別）、使えるのは1手番に1枚までです。</p>
+<div class="scroll">
+<table>
+  <tr><th>カード</th><th>枚数</th><th>使うと</th></tr>
+  <tr><td>騎士</td><td>14</td><td>盗賊を動かして1枚奪う。サイコロの前にも使える</td></tr>
+  <tr><td>得点</td><td>5</td><td>持っているだけで1点（見せずに持っておける）</td></tr>
+  <tr><td>道づくり</td><td>2</td><td>道を2本ただで建てる</td></tr>
+  <tr><td>収穫</td><td>2</td><td>銀行から好きな資源を2枚もらう</td></tr>
+  <tr><td>独占</td><td>2</td><td>資源を1種類言い、ほかの全員からその資源を全部もらう</td></tr>
+</table>
+</div>
+<div class="box lesson"><span class="k">学び</span>9点のときに発展カードを買えるなら、得点カードを引けばその場で勝ちです。このサイトの研究では、AIがこの手を見逃して勝つ確率を大きく落としていた局面が見つかり、直しました。</div>
+
+<h2 id="points">9. 点の数え方</h2>
+<div class="scroll">
+<table>
+  <tr><th>点になるもの</th><th>点</th></tr>
+  <tr><td>村</td><td>1</td></tr>
+  <tr><td>街</td><td>2</td></tr>
+  <tr><td>最長の道（5本以上つながった道で一番長い人。同じ長さなら先に持っていた人のまま）</td><td>2</td></tr>
+  <tr><td>最大の騎士（騎士を3枚以上使い、一番多い人）</td><td>2</td></tr>
+  <tr><td>得点カード</td><td>1枚1点</td></tr>
+</table>
+</div>
+<p>覚えたら、<a href="play.html">AIと対戦</a>で遊んでみましょう。迷ったら「AIならどう打つ？」を押すと、強いAIのおすすめが見られます。</p>
+
+<footer class="site">「島の交易路」はこの研究のためのオリジナルの名前です。AI とページのソースは <a href="https://github.com/satou-aaaaa/isle-routes-research">GitHub</a> にあります。</footer>
+</div>
+</body>
+</html>
