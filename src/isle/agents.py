@@ -8,17 +8,34 @@ from .board import TOPO
 from .features import DEFAULT_WEIGHTS, F, evaluate
 from .game import (
     COST,
+    DEV_DECK,
     DISCARD,
     MAIN,
     PRE_ROLL,
     ROBBER,
     STEAL,
+    VP_CARD,
+    WIN_VP,
     Game,
 )
 from .solver import find_win
 
-DEV_VP_SHARE = 5 / 25  # 発展カードの山に占める得点カードの割合（買う手の見積もりに使う）
+WIN_VALUE = 100.0  # 勝った局面の評価値（features.evaluate と同じ）
 MAX_ACTIONS_PER_TURN = 40  # 交換の行ったり来たりを止める安全弁
+
+
+def dev_vp_share(g: Game, p: int) -> float:
+    """p から見て、次に引く発展カードが得点カードである確率。
+
+    得点カードは使われずに手元に残るので、p に見えない札（山＋相手の手元の発展カード）の中の
+    得点カードは「5 − 自分の得点カード」枚。相手の手元の枚数は公開の情報なので、
+    見えない札はどれも同じ確からしさで山の一番上にある、とみなせる（山の順番はのぞかない）。
+    """
+    unseen = len(g.dev_deck) + sum(sum(q.dev) for i, q in enumerate(g.players) if i != p)
+    if unseen <= 0:
+        return 0.0
+    vp_left = DEV_DECK.count(VP_CARD) - g.players[p].dev[VP_CARD]
+    return max(0.0, min(1.0, vp_left / unseen))
 
 
 class RandomAgent:
@@ -118,13 +135,23 @@ class GreedyAgent:
         if a[0] == "buy_dev":
             # 山札の中身を見ないよう、払うところまで進めて平均で足す
             c._pay(p, COST["dev"])
-            return (
-                self.value(c, p)
-                + self.w[F["dev_hidden"]] * (1 - DEV_VP_SHARE)
-                + self.w[F["vp"]] * DEV_VP_SHARE
-            )
+            share = dev_vp_share(g, p)
+            rest = self.value(c, p) + self.w[F["dev_hidden"]] * (1 - share)
+            if g.vp(p) + 1 >= WIN_VP:
+                # 得点カードを引けばその場で勝ち（R-007）
+                return share * WIN_VALUE + (1 - share) * rest
+            return rest + self.w[F["vp"]] * share
         c.apply(a)
         v = self.value(c, p)
+        if (
+            c.phase == MAIN
+            and c.current == p
+            and c.dev_deck
+            and c.vp(p) + 1 >= WIN_VP
+            and c._can_pay(p, COST["dev"])
+        ):
+            # 交換などで発展カードを買える手札になる手は、そのあと買う値も見る（勝ちまで1点のとき）
+            v = max(v, self._action_value(c, p, ("buy_dev",)))
         if a[0] == "knight" and c.phase == ROBBER:
             v += 0.05  # 盗賊を動かせる分
         return v
