@@ -17,12 +17,13 @@
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
 
 from .agents import GreedyAgent
 from .board import TOPO, dice_ways
 from .game import DISCARD, FREE_ROAD, MAIN, MONOPOLY, OVER, PRE_ROLL, ROBBER, STEAL, Game
-from .solver import find_win
+from .solver import could_win, find_win
 
 MAXN, PARANOID = "maxn", "paranoid"
 DICE = [(d, dice_ways(d) / 36) for d in range(2, 13)]
@@ -90,13 +91,21 @@ def dev_outcomes(g: Game) -> list[tuple[float, Game]]:
 
 
 class RoundSolver:
-    def __init__(self, root: int, mode: str = MAXN, max_nodes: int = 4000, max_ends: int = 600):
+    def __init__(
+        self,
+        root: int,
+        mode: str = MAXN,
+        max_nodes: int = 4000,
+        max_ends: int = 600,
+        max_seconds: float | None = None,
+    ):
         if mode not in (MAXN, PARANOID):
             raise ValueError(mode)
         self.root = root
         self.mode = mode
         self.max_nodes = max_nodes
         self.max_ends = max_ends
+        self.deadline = None if max_seconds is None else time.monotonic() + max_seconds
         self.nodes = 0
         self._turn_memo: dict = {}
         self._end_memo: dict = {}
@@ -155,10 +164,32 @@ class RoundSolver:
             return self._end_memo[key]
         if len(self._end_memo) >= self.max_ends:
             raise TooBig("end states")
+        self._check_time()
+        if not self._root_may_win_next(s):
+            self._end_memo[key] = 0.0  # 次の手番にどう出目が出ても届かない
+            return 0.0
         self._w_memo: dict = {}
         v = self._w(s, 1)
         self._end_memo[key] = v
         return v
+
+    def _check_time(self) -> None:
+        if self.deadline is not None and time.monotonic() > self.deadline:
+            raise TooBig("time")
+
+    def _root_may_win_next(self, s: Game) -> bool:
+        """相手3人と自分の4回のサイコロで一番多くもらえたとしても、次の手番に届かないなら False。"""
+        root = self.root
+        pl = s.players[root]
+        if pl.dev[MONOPOLY] > 0:
+            return True  # 相手の手札しだいで増えるので見積もらない
+        per_roll = [0] * 13
+        for v, b in enumerate(s.building):
+            if b == root:
+                k = 2 if s.is_city[v] else 1
+                for _h, _r, num in s.vertex_yield[v]:
+                    per_roll[num] += k
+        return could_win(s, root, extra_cards=4 * max(per_roll) + 1)
 
     def _w(self, s: Game, k: int) -> float:
         """手番 k 人目（1〜3 は相手、4 は根の次の手番）の、サイコロを振る前の局面からの値。"""
@@ -167,6 +198,7 @@ class RoundSolver:
         key = (k, s.robber, tuple(tuple(pl.hand) for pl in s.players))
         if key in self._w_memo:
             return self._w_memo[key]
+        self._check_time()  # 1つの終わり方の先も大きいので、ここでも時間を見る
         assert s.phase == PRE_ROLL
         v = 0.0
         for d, pr in DICE:
@@ -207,31 +239,54 @@ class RoundSolver:
     def _win_prob(self, opts: list[tuple[float, Game]]) -> float:
         return sum(pr * self._can_win(c) for pr, c in opts)
 
-    def _robber_options(self, s: Game) -> list[tuple[tuple, list[tuple[float, Game]]]]:
-        """7・盗賊の場面: (盗賊の置き場, 盗む相手) ごとの (確率, MAIN の局面) の一覧。"""
-        out = []
-        for a in s.legal_actions():
-            c = s.clone(keep_rng=False)
-            c.apply(a)
-            if c.phase == STEAL:
-                for q in c._steal_targets():
-                    out.append(((a[1], q), steal_outcomes(c, q)))
-            else:
-                out.append(((a[1], None), [(1.0, c)]))
+    @staticmethod
+    def _hex_targets(s: Game) -> dict[int, list[int]]:
+        """盗賊を置ける六角形ごとの、盗める相手（いなければ空）。"""
+        out = {}
+        me = s.current
+        for h in range(len(s.layout.terrain)):
+            if h == s.robber:
+                continue
+            qs = set()
+            for v in TOPO.hex_vertices[h]:
+                q = s.building[v]
+                if q not in (-1, me) and s.players[q].cards() > 0:
+                    qs.add(q)
+            out[h] = sorted(qs)
+        return out
+
+    @staticmethod
+    def _place(s: Game, h: int, q: int | None) -> list[tuple[float, Game]]:
+        """盗賊を h に置き、q から盗む（q が None なら盗まない）: (確率, MAIN の局面)。"""
+        c = s.clone(keep_rng=False)
+        c.robber = h
+        if q is None:
+            c._after_robber()
+            return [(1.0, c)]
+        c.phase = STEAL
+        return steal_outcomes(c, q)
+
+    def _by_victim(self, s: Game) -> dict:
+        """盗む相手（None は盗まない）ごとに、貪欲AIの目安で一番よい置き場。"""
+        targets = self._hex_targets(s)
+        groups: dict = {}
+        for h, qs in targets.items():
+            for q in qs or [None]:
+                groups.setdefault(q, []).append(h)
+        out = {}
+        for q, hexes in groups.items():
+            acts = [("robber", h) for h in hexes]
+            out[q] = acts[0][1] if len(acts) == 1 else self._greedy._robber(s, s.current, acts)[1]
         return out
 
     def _root_next(self, s: Game) -> float:
         do_discards(s)
         if s.phase == MAIN:
             return float(self._can_win(s))
-        # 7: 盗む相手ごとに1つずつ（置き場はこの手番の勝ちに関係しない）
+        # 7: 盗む相手ごとに1つずつ（置き場はこの手番の勝ちにほぼ関係しない）
         best = 0.0
-        seen = set()
-        for (_h, q), outs in self._robber_options(s):
-            if q in seen:
-                continue
-            seen.add(q)
-            best = max(best, self._win_prob(outs))
+        for q, h in self._by_victim(s).items():
+            best = max(best, self._win_prob(self._place(s, h, q)))
             if best == 1.0:
                 break
         return best
@@ -240,38 +295,35 @@ class RoundSolver:
         do_discards(s)
         if s.phase == MAIN:
             return self._opp_main(s, k)
-        opts = self._robber_options(s)
+        h0, q0 = self._maxn_choice(s)
         if self.mode == PARANOID:
-            near = {
-                h
-                for v in range(len(s.building))
-                if s.building[v] == self.root
-                for h in TOPO.vertex_hexes[v]
-            }
-            cand = [o for o in opts if o[0][0] in near]
-            cand.append(self._maxn_choice(s, opts))
-            return min(sum(pr * self._opp_main(c, k) for pr, c in outs) for _o, outs in cand)
-        _o, outs = self._maxn_choice(s, opts)
-        return sum(pr * self._opp_main(c, k) for pr, c in outs)
+            mine = [v for v in range(len(s.building)) if s.building[v] == self.root]
+            near = {h for v in mine for h in TOPO.vertex_hexes[v]}
+            cand = {(h0, q0)}
+            for h, qs in self._hex_targets(s).items():
+                if h in near:
+                    cand.update((h, q) for q in qs or [None])
+            return min(
+                sum(pr * self._opp_main(c, k) for pr, c in self._place(s, h, q)) for h, q in cand
+            )
+        return sum(pr * self._opp_main(c, k) for pr, c in self._place(s, h0, q0))
 
-    def _maxn_choice(self, s: Game, opts):
-        """相手が自分の勝つ確率を最大にする置き場。同じなら貪欲AIの置き場・盗む相手。"""
+    def _maxn_choice(self, s: Game) -> tuple[int, int | None]:
+        """相手が自分の勝つ確率を最大にする (置き場, 盗む相手)。同じなら貪欲AIの選び方。"""
         g_hex = self._greedy._robber(s, s.current, s.legal_actions())[1]
-        probs = [self._win_prob(outs) for _o, outs in opts]
-        top = max(probs)
-        tied = [o for o, p in zip(opts, probs, strict=True) if p == top]
-        if top == 0.0:
-            for o in tied:
-                if o[0][0] == g_hex:
-                    victims = [x for x in tied if x[0][0] == g_hex]
-                    if len(victims) > 1:
-                        best_q = max(
-                            (x[0][1] for x in victims),
-                            key=lambda q: (s.vp(q, hidden=False), s.players[q].cards()),
-                        )
-                        return next(x for x in victims if x[0][1] == best_q)
-                    return o
-        return tied[0]
+        g_targets = self._hex_targets(s)[g_hex]
+        g_q = (
+            max(g_targets, key=lambda q: (s.vp(q, hidden=False), s.players[q].cards()))
+            if g_targets
+            else None
+        )
+        by_q = self._by_victim(s)
+        probs = {q: self._win_prob(self._place(s, h, q)) for q, h in by_q.items()}
+        top = max(probs.values())
+        if probs.get(g_q, -1.0) == top:
+            return g_hex, g_q
+        q = next(q for q in by_q if probs[q] == top)
+        return by_q[q], q
 
     def _opp_main(self, s: Game, k: int) -> float:
         if s.phase == OVER:

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import time
+
 import pytest
 
 from isle.agents import make_agent
@@ -46,29 +48,30 @@ def test_could_win_never_hides_a_win():
     assert wins > 0
 
 
-def _small_positions(n: int):
+def _small_positions():
+    """R-002 の測定（seed 800037）で、数秒で読み切れて値が0でなかった2局面。"""
     out = []
-    for g in _main_positions(4, min_vp=8, seed=950):
-        try:
-            for mode in (MAXN, PARANOID):
-                RoundSolver(g.current, mode, max_nodes=300, max_ends=40).value(g.clone())
-        except TooBig:
-            continue
-        out.append(g)
-        if len(out) >= n:
-            break
+    g = Game(seed=800037)
+    agents = [make_agent("greedy_win", seed=800037 * 10 + j) for j in range(4)]
+    last = -1
+    while not g.is_over() and g.turns <= 40:
+        if g.phase == MAIN and g.turns != last:
+            last = g.turns
+            if g.turns in (36, 40):
+                out.append(g.clone())
+        g.apply(agents[g.to_act].act(g))
     return out
 
 
 def test_round_values_are_consistent():
-    positions = _small_positions(3)
-    assert positions
+    positions = _small_positions()
+    assert len(positions) == 2
     for g in positions:
         vals = {}
         for mode in (MAXN, PARANOID):
-            rs = RoundSolver(g.current, mode, max_nodes=300, max_ends=40)
+            rs = RoundSolver(g.current, mode, max_seconds=60)
             v = rs.value(g.clone())
-            assert 0.0 <= v <= 1.0
+            assert 0.0 < v <= 1.0
             if find_win(g):
                 assert v == 1.0
             for name in ("greedy", "greedy_win"):
@@ -77,3 +80,12 @@ def test_round_values_are_consistent():
             vals[mode] = v
         # paranoid の相手は max^n の相手の選び方も候補に入れて最悪を選ぶので、値は大きくならない
         assert vals[PARANOID] <= vals[MAXN] + 1e-9
+
+
+def test_time_limit_stops_the_search():
+    """時間の上限は、1つの終わり方の先を読んでいる途中でも効く（CI や測定が止まらなくならない）。"""
+    g = next(x for x in _main_positions(4, min_vp=8, seed=950) if x.vp(x.current) >= 7)
+    t = time.monotonic()
+    with pytest.raises(TooBig):
+        RoundSolver(g.current, MAXN, max_seconds=1).value(g.clone())
+    assert time.monotonic() - t < 15

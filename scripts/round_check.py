@@ -38,15 +38,18 @@ def positions(seed: int, min_vp: int):
     while not g.is_over():
         if g.phase == MAIN and g.turns != last:
             last = g.turns
-            if max(g.vp(q) for q in range(4)) >= min_vp:
+            # 根が7点未満なら、この1巡で根が勝つ確率はどの手でも0なので測らない
+            if max(g.vp(q) for q in range(4)) >= min_vp and g.vp(g.current) >= 7:
                 yield g.clone()
         g.apply(agents[g.to_act].act(g))
 
 
 def solve_game(args: tuple) -> list[dict]:
-    seed, min_vp, max_nodes, max_ends = args
+    seed, min_vp, max_nodes, max_ends, per_game, max_seconds, out_path = args
     out = []
-    for g in positions(seed, min_vp):
+    for i, g in enumerate(positions(seed, min_vp)):
+        if per_game and i >= per_game:
+            break
         rec = {
             "seed": seed,
             "turn": g.turns,
@@ -57,7 +60,13 @@ def solve_game(args: tuple) -> list[dict]:
         t = time.time()
         try:
             for mode in (MAXN, PARANOID):
-                rs = RoundSolver(g.current, mode, max_nodes=max_nodes, max_ends=max_ends)
+                rs = RoundSolver(
+                    g.current,
+                    mode,
+                    max_nodes=max_nodes,
+                    max_ends=max_ends,
+                    max_seconds=max_seconds,
+                )
                 r = {"best": rs.value(g.clone())}
                 for name in AGENT_NAMES:
                     r[name] = rs.agent_value(g.clone(), agent_chooser(make_agent(name, seed=1)))
@@ -67,6 +76,9 @@ def solve_game(args: tuple) -> list[dict]:
             rec["too_big"] = str(e)
         rec["sec"] = round(time.time() - t, 2)
         out.append(rec)
+        if out_path:
+            with open(out_path, "a") as f:
+                f.write(json.dumps(rec) + "\n")
     return out
 
 
@@ -104,14 +116,29 @@ def main() -> None:
     ap.add_argument("--max-nodes", type=int, default=4000)
     ap.add_argument("--max-ends", type=int, default=600)
     ap.add_argument("--workers", type=int, default=1)
+    ap.add_argument("--per-game", type=int, default=0, help="1局から使う局面の数（0 は全部）")
+    ap.add_argument("--max-seconds", type=float, default=None, help="1局面・考え方1つの秒の上限")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
     t = time.time()
-    jobs = [(args.seed + i, args.min_vp, args.max_nodes, args.max_ends) for i in range(args.games)]
     recs: list[dict] = []
     out_dir = Path(args.out) if args.out else None
+    out_path = ""
     if out_dir:
         out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = str(out_dir / "positions.jsonl")
+    jobs = [
+        (
+            args.seed + i,
+            args.min_vp,
+            args.max_nodes,
+            args.max_ends,
+            args.per_game,
+            args.max_seconds,
+            out_path,
+        )
+        for i in range(args.games)
+    ]
     with ProcessPoolExecutor(max_workers=args.workers) as ex:
         for i, res in enumerate(ex.map(solve_game, jobs)):
             recs.extend(res)
@@ -119,10 +146,6 @@ def main() -> None:
                 f"game {i + 1}/{args.games} positions={len(recs)} {time.time() - t:.0f}s",
                 flush=True,
             )
-            if out_dir:
-                with open(out_dir / "positions.jsonl", "a") as f:
-                    for r in res:
-                        f.write(json.dumps(r) + "\n")
     s = summarize(recs)
     s["seconds"] = round(time.time() - t)
     print(json.dumps(s, ensure_ascii=False, indent=1))

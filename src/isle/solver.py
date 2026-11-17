@@ -66,19 +66,26 @@ def _build_vp(costs: list[int], cards: int) -> int:
     return n
 
 
-def could_win(g: Game) -> bool:
+def could_win(g: Game, p: int | None = None, extra_cards: int = 0) -> bool:
     """この手番で10点に届く見込みが少しでもあるか（甘めの上限。False なら必ず届かない）。
+
+    p を渡すと、その人の次の手番（発展カードは全部使える）について、手札が extra_cards 枚
+    増えたとして見積もる（1巡先の見込みに使う）。
 
     村は4枚（今の道から建てられる空き頂点がなければ道の分も入れて6枚以上）、街は5枚で1点。
     交換は枚数を減らすだけ。最長の道（2点）は道1本2枚。
     発展カードは1手番1枚なので、増える手札は豊作2枚・独占（相手の持つ1種類の合計）・騎士で盗む1枚の大きい方。
     """
-    p = g.current
-    pl = g.players[p]
+    if p is None or p == g.current:
+        p = g.current
+        pl = g.players[p]
+        usable = [] if g.dev_played else [c for c in range(5) if pl.dev[c] - pl.dev_new[c] > 0]
+    else:
+        pl = g.players[p]
+        usable = [c for c in range(5) if pl.dev[c] > 0]
     need = WIN_VP - g.vp(p)
     if need <= 0:
         return True
-    usable = [] if g.dev_played else [c for c in range(5) if pl.dev[c] - pl.dev_new[c] > 0]
     extra = 0
     if PLENTY in usable:
         extra = 2
@@ -88,7 +95,7 @@ def could_win(g: Game) -> bool:
         )
     if KNIGHT in usable:
         extra = max(extra, 1)
-    cards = pl.cards() + extra
+    cards = pl.cards() + extra + extra_cards
     army = 0
     if KNIGHT in usable and g.army_holder != p:
         h = g.army_holder
