@@ -6,10 +6,10 @@ import random
 
 import pytest
 
-from isle.agents import GreedyAgent, RandomAgent, make_agent
+from isle.agents import GreedyAgent, RandomAgent, WinCheckAgent, dev_vp_share, make_agent
 from isle.arena import play_game, replay, run_rotated
 from isle.features import DEFAULT_WEIGHTS, FEATURES, features
-from isle.game import Game
+from isle.game import MAIN, VP_CARD, Game
 from isle.models import load
 
 
@@ -88,3 +88,50 @@ def test_rotated_counts():
 def test_greedy_beats_random():
     res = run_rotated(["greedy", "random", "random", "random"], make_agent, 10, seed=100)
     assert res["agents"]["greedy"]["win_rate"] > 0.8
+
+
+def _main_phase_game(seed: int) -> Game:
+    g = Game(seed=seed)
+    rng = random.Random(seed)
+    while not (g.phase == MAIN and g.current == 0 and g.turns >= 8):
+        g.apply(rng.choice(g.legal_actions()))
+    return g
+
+
+def test_dev_vp_share_counts_unseen_cards():
+    """得点カードの確率は「見えない札（山＋相手の手元）」の中の割合（R-007）。"""
+    g = Game(seed=1)
+    assert dev_vp_share(g, 0) == pytest.approx(5 / 25)
+    # 自分が得点カードを2枚、相手が3枚の発展カードを持ち、山が10枚
+    g.players[0].dev[VP_CARD] = 2
+    g.players[1].dev[0] = 3
+    g.dev_deck = g.dev_deck[:10]
+    assert dev_vp_share(g, 0) == pytest.approx(3 / 13)
+    g.players[0].dev[VP_CARD] = 5
+    assert dev_vp_share(g, 0) == 0.0
+
+
+def _at_nine(g: Game, hand) -> Game:
+    pl = g.players[0]
+    pl.settlements, pl.cities = 1, 4  # 9点（盤の上の形は使わない）
+    g.longest_holder = g.army_holder = None
+    pl.dev = [0] * 5
+    pl.hand = list(hand)
+    return g
+
+
+def test_buys_dev_when_one_point_from_winning():
+    """9点で発展カードを買えるなら、手番を終えずに買う（引けばその場で勝ち）。"""
+    for seed in range(5):
+        g = _at_nine(_main_phase_game(seed), (0, 0, 1, 1, 1))
+        assert ("buy_dev",) in g.legal_actions()
+        for agent in (GreedyAgent(seed=0), WinCheckAgent(seed=0)):
+            assert agent.act(g) == ("buy_dev",)
+
+
+def test_trades_toward_dev_when_one_point_from_winning():
+    """9点で鉱石だけ足りないなら、銀行と交換して買える手札にする。"""
+    for seed in range(5):
+        g = _at_nine(_main_phase_game(seed), (4, 0, 1, 1, 0))
+        a = GreedyAgent(seed=0).act(g)
+        assert a == ("trade", 0, 4), a
