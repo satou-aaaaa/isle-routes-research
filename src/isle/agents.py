@@ -114,7 +114,7 @@ class GreedyAgent:
         return best
 
     def _action_value(self, g: Game, p: int, a: tuple) -> float:
-        c = g.clone()
+        c = g.clone(keep_rng=False)  # 手番の中の手は乱数を使わない（速さのため写さない）
         if a[0] == "buy_dev":
             # 山札の中身を見ないよう、払うところまで進めて平均で足す
             c._pay(p, COST["dev"])
