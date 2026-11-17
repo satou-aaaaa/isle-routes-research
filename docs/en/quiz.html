@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opening Quiz | Isle Routes</title>
+<meta name="description" content="Where should your opening village go? An Isle Routes quiz with answers checked by AI-vs-AI games.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap">
+<style>:root {
+  --bg: #eef3f4; --paper: #ffffff; --ink: #17262b; --muted: #55686e; --line: #cfdcdf;
+  --accent: #17708a; --accent-ink: #ffffff; --warm: #b5562d; --soft: #e2eef1;
+  --font-display: "Zen Maru Gothic", "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #10191c; --paper: #182428; --ink: #e3ecee; --muted: #9db0b5; --line: #2b3b40; --accent: #5cc0d8; --accent-ink: #0d1a1d; --warm: #e58a62; --soft: #1e3036; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #10191c; --paper: #182428; --ink: #e3ecee; --muted: #9db0b5; --line: #2b3b40; --accent: #5cc0d8; --accent-ink: #0d1a1d; --warm: #e58a62; --soft: #1e3036; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.8; padding: 0 16px 64px; }
+.wrap { max-width: 820px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.35; word-break: auto-phrase; }
+h1 { font-size: clamp(28px, 6vw, 40px); margin: 32px 0 8px; }
+h2 { font-size: 22px; margin: 40px 0 8px; }
+h3 { font-size: 18px; margin: 24px 0 4px; }
+a { color: var(--accent); }
+p, li { max-width: 40em; }
+.lede { color: var(--muted); margin-top: 0; }
+.note { font-size: 14px; color: var(--muted); }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin: 14px 0; }
+.lesson { border-left: 4px solid var(--accent); }
+.lesson .k { display: inline-block; font-weight: 700; color: var(--accent); margin-right: 6px; }
+table { border-collapse: collapse; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+.scroll { overflow-x: auto; }
+nav.site { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+nav.site .home { font-weight: 700; margin-right: 8px; color: var(--ink); text-decoration: none; }
+nav.site a.p { color: var(--muted); text-decoration: none; padding: 3px 10px; border-radius: 999px; }
+nav.site a.p:hover, nav.site a.p:focus-visible { color: var(--ink); background: var(--paper); outline: none; }
+nav.site a.p[aria-current="page"] { color: var(--accent-ink); background: var(--accent); }
+nav.site a.lang { margin-left: auto; border: 1px solid var(--line); }
+@media (pointer: coarse), (max-width: 600px) { nav.site a { min-height: 44px; display: inline-flex; align-items: center; } }
+footer.site { margin-top: 48px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.quiz { display: grid; gap: 6px; }
+.qno { margin: 0; color: var(--muted); font-size: 14px; }
+.qask { margin: 0; font-weight: 700; font-size: 18px; }
+.qlegend { margin: 0; }
+#qboard { width: 100%; max-width: 620px; max-height: 70vh; height: auto; display: block; }
+#qboard .sea { fill: #7fb4cf; }
+#qboard polygon { stroke: #f4efe2; stroke-width: .05; }
+#qboard .hex-icon { font-size: .42px; text-anchor: middle; }
+#qboard .chip { fill: #fbf6e8; stroke: #6b5b3a; stroke-width: .03; }
+#qboard .num { font-size: .36px; font-weight: 700; text-anchor: middle; fill: #2b2b2b; font-family: system-ui, sans-serif; }
+#qboard .num.hot, #qboard .pips.hot { fill: #c0392b; }
+#qboard .pips { font-size: .2px; text-anchor: middle; fill: #2b2b2b; }
+#qboard .pier { stroke: #e9dcc0; stroke-width: .08; }
+#qboard .port { stroke: #3c3c3c; stroke-width: .03; }
+#qboard .port-t { font-size: .26px; font-weight: 700; text-anchor: middle; fill: #fff; font-family: system-ui, sans-serif; }
+#qboard .port-t.dark { fill: #222; }
+#qboard .port-i { font-size: .26px; text-anchor: middle; }
+#qboard .road { stroke-width: .16; stroke-linecap: round; }
+#qboard .bld { stroke: #fff; stroke-width: .05; }
+#qboard .bld.mine { stroke: #111; stroke-width: .07; }
+#qboard .choice { cursor: pointer; }
+#qboard .choice circle { fill: #fff; stroke: #111; stroke-width: .06; }
+#qboard .choice text { font-size: .44px; font-weight: 700; text-anchor: middle; fill: #111; font-family: system-ui, sans-serif; }
+#qboard .choice:hover circle, #qboard .choice:focus circle { fill: #ffe066; }
+#qboard .choice:focus { outline: none; }
+#qboard .choice.right circle { fill: #2e9e5b; }
+#qboard .choice.right text { fill: #fff; }
+#qboard .choice.wrong circle { fill: #d64545; }
+#qboard .choice.wrong text { fill: #fff; }
+#qboard .choice.dim { opacity: .6; }
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
+.choices { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.opt { font: inherit; text-align: left; display: grid; grid-template-columns: 28px 1fr; gap: 0 8px; align-items: center; min-height: 56px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); cursor: pointer; }
+.opt b { grid-row: span 3; font-size: 20px; font-family: var(--font-display); }
+.opt span { font-size: 14px; }
+.opt small { color: var(--muted); font-size: 13px; }
+.opt em { font-style: normal; font-weight: 700; font-size: 14px; }
+.opt:hover, .opt:focus-visible { border-color: var(--accent); outline: none; }
+.opt.right { border-color: #2e9e5b; box-shadow: inset 0 0 0 2px #2e9e5b; }
+.opt.wrong { border-color: #d64545; box-shadow: inset 0 0 0 2px #d64545; }
+.opt.dim { opacity: .7; }
+.opt:disabled { cursor: default; }
+.verdict { font-weight: 700; font-size: 20px; margin: 12px 0 0; }
+.verdict.ok { color: #2e9e5b; }
+.verdict.ng { color: #d64545; }
+.score { font-weight: 700; }
+button.primary { font: inherit; min-height: 44px; padding: 6px 18px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer; }
+summary { cursor: pointer; padding-block: 10px; }
+</style>
+<link rel="alternate" hreflang="ja" href="https://satou-aaaaa.github.io/isle-routes-research/quiz.html"><link rel="alternate" hreflang="en" href="https://satou-aaaaa.github.io/isle-routes-research/en/quiz.html"><link rel="alternate" hreflang="x-default" href="https://satou-aaaaa.github.io/isle-routes-research/en/quiz.html">
+<script>(function(){var K="site-lang",cur="en",alt="../quiz.html",s=null;try{s=localStorage.getItem(K)}catch(e){}if(!/bot|crawl|spider|slurp|lighthouse/i.test(navigator.userAgent)){var l=(navigator.languages&&navigator.languages[0])||navigator.language||'';var want=s||(/^ja\b/i.test(l)?'ja':'en');if(want!==cur){location.replace(alt+location.search+location.hash);return}}document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-lang]');if(a)try{localStorage.setItem(K,a.getAttribute('data-lang'))}catch(e){}})})();</script>
+</head>
+<body>
+<div class="wrap">
+<nav class="site" aria-label="Site pages"><a class="home" href="index.html">Isle Routes</a><a class="p" href="rules.html">Rules</a><a class="p" href="play.html">Play the AI</a><a class="p" href="quiz.html" aria-current="page">Opening Quiz</a><a class="p" href="stats.html">By the Numbers</a><a class="p lang" href="../quiz.html" hreflang="ja" lang="ja" data-lang="ja" title="日本語に切り替え">日本語</a></nav>
+<h1 id="qtop">Opening Quiz</h1>
+<p class="lede">Where you place your opening villages decides most of your income. Pick which of A–D wins most often, and compare with answers checked by AI-vs-AI games.</p>
+<section class="quiz">
+  <p class="qno" id="qno"></p>
+  <p class="qask" id="qask"></p>
+  <p class="qlegend note" id="qlegend"></p>
+  <svg id="qboard" viewBox="-6.4 -5.6 12.8 11.2" role="img" aria-label="The quiz board"></svg>
+  <p class="note" id="qhint"></p>
+  <div id="qchoices" class="choices"></div>
+  <div id="qresult" hidden></div>
+</section>
+<details class="box">
+  <summary>How the answers were decided</summary>
+  <p>Four Normal AIs play the opening up to the quiz position. For each of the AI's top-rated spots, we placed the village there and let the AIs play hundreds of games to the end, then compared that seat's win rate. The choices are the spot that won most and spots that won <b>clearly</b> less (by more than twice the measurement noise).</p>
+  <p class="note">These are AI-vs-AI win rates, so answers may differ between people. For how numbers and resources work see <a href="rules.html">Rules</a>, and for overall trends see <a href="stats.html">By the Numbers</a>.</p>
+</details>
+
+<footer class="site">"Isle Routes" is an original name made for this research project. The source code of the AI and these pages is on <a href="https://github.com/satou-aaaaa/isle-routes-research">GitHub</a>.</footer>
+</div>
+<script src="../quiz_data.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

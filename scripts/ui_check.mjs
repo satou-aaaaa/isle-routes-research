@@ -7,7 +7,7 @@
 // 見ること: コンソールのエラー・読み込み失敗、横のはみ出し、押す場所の大きさ（24px 未満は ✗、
 // スマホで高さ 44px 未満は △）と名前、12px 未満の文字、言語の自動切り替え。
 // 対戦ページは対局を始め、初期配置の村と道を盤の上で選んで確定し、サイコロのあとの手番を2回終える
-// （1回目は「AIならどう打つ？」も押す）。
+// （1回目は「AIならどう打つ？」も押す）。クイズは選択肢と盤の印で1問ずつ答え、結果の欄を見る。
 // 点検の部分は姉妹プロジェクト carcassonne-research の scripts/ui_check.mjs から写している。
 //
 // Pyodide は cdn.jsdelivr.net から読む。そこへ届かない環境では、npm の pyodide パッケージを
@@ -331,6 +331,24 @@ async function main() {
         } catch (e) {
           problems.push(`対戦ページの操作に失敗: ${String(e).slice(0, 200)}`);
           if (shotDir) await page.screenshot({ path: path.join(shotDir, `${stem}_fail.png`), fullPage: true });
+        }
+      }
+      if (file.endsWith("quiz.html")) {
+        // クイズ: 1問答えると、正解・各選択肢の勝率・学び・次の問題が出る
+        try {
+          await page.click("#qchoices .opt");
+          await page.waitForSelector("#qresult:not([hidden]) .lesson", { timeout: 5000 });
+          const rates = await page.$$eval("#qchoices .opt em", (es) => es.length);
+          if (rates !== 4) problems.push(`クイズ: 答えたあとの勝率が ${rates} 個（4個のはず）`);
+          await page.click("#qresult button.primary");
+          await page.waitForSelector("#qresult[hidden]", { state: "attached", timeout: 5000 });
+          await page.click("#qboard .choice");
+          await page.waitForSelector("#qresult:not([hidden])", { timeout: 5000 });
+          const r2 = await page.evaluate(inspect, vp.isMobile);
+          res = { errors: [...res.errors, ...r2.errors], warns: [...res.warns, ...r2.warns] };
+          if (shotDir) await page.screenshot({ path: path.join(shotDir, `${stem}_answered.png`), fullPage: true });
+        } catch (e) {
+          problems.push(`クイズの操作に失敗: ${String(e).slice(0, 200)}`);
         }
       }
       const errs = [...problems, ...res.errors];

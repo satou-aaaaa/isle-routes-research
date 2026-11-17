@@ -16,6 +16,7 @@ PAGES = [
     ("index.html", "トップ", "Home"),
     ("rules.html", "ルール入門", "Rules"),
     ("play.html", "AIと対戦", "Play the AI"),
+    ("quiz.html", "初期配置クイズ", "Opening Quiz"),
     ("stats.html", "データで見る", "By the Numbers"),
 ]
 

@@ -37,6 +37,7 @@ python scripts/run_match.py --agents greedy,random,random,random --games 20  # �
 | `src/isle/webapi.py` | 対戦ページ（ブラウザの Pyodide）から使う窓口。人の席から見えない情報は出さない |
 | `web/`・`scripts/build_pages.py` | 公開サイト（GitHub Pages、`docs/` と英語版 `docs/en/`）の元と組み立て。`docs/py/` は `src/isle` の写し |
 | `scripts/collect_stats.py`・`data/stats.json` | AI どうしの対局の集計。データページの数字と「学び」の言い切りはここから組み立てる（`scripts/build_stats.py`） |
+| `scripts/make_quiz.py`・`data/quiz.json` | 初期配置クイズの問題づくり（候補ごとに最後まで打って勝率で正解を決める）。解説は `scripts/build_quiz.py` |
 | `scripts/ui_check.mjs` | 公開ページをスマホ幅・PC幅で点検し、対戦ページで実際に数手打つ |
 | `tests/` | ルールのテスト |
 | `scripts/check.py` | push 前・CI の確認 |

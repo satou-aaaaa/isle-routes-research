@@ -30,6 +30,6 @@
  "発展カードを買った数は、勝った人が平均{{dev_win}}枚、負けた人が{{dev_lose}}枚でした。": "Winners bought {{dev_win}} development cards on average, the others {{dev_lose}}.",
  "7が出たのはサイコロの{{seven}}でした（計算どおりなら6回に1回＝16.7%）。": "A 7 came up on {{seven}} of rolls (the math says 1 in 6 = 16.7%).",
  "測り方: AI（ふつう＝1手先の評価＋この手番で勝てる筋の読み切り）4人の対局 {{games}} 局。盤・サイコロ・発展カードの山はランダム。カッコの範囲は95%の確からしさの幅です。AIどうしの数字なので、人どうしの対局では違うこともあります。集計のプログラムは <a href=\"https://github.com/satou-aaaaa/isle-routes-research/blob/main/scripts/collect_stats.py\">collect_stats.py</a>。": "Method: {{games}} games between four Normal AIs (one-move evaluation plus an exact search for wins available this turn). Boards, dice and the development deck are random. Ranges in parentheses are 95% intervals. These are AI-vs-AI numbers, so games between people may differ. The script is <a href=\"https://github.com/satou-aaaaa/isle-routes-research/blob/main/scripts/collect_stats.py\">collect_stats.py</a>.",
- "はじめの置き方は、<a href=\"play.html\">AIと対戦</a>で「AIならどう打つ？」を押して、AIの選び方と比べてみましょう。": "For the opening, try <a href=\"play.html\">Play the AI</a> and press \"What would the AI do?\" to compare your choice with the AI's.",
- "<b>{{ore_gap}}</b><span>はじめの村で鉱石が多い人（点5以上）と出ない人の勝率の差</span>": "<b>{{ore_gap}}</b><span>Win-rate gap between players whose opening villages produce plenty of ore (5+ dots) and none</span>"
+ "<b>{{ore_gap}}</b><span>はじめの村で鉱石が多い人（点5以上）と出ない人の勝率の差</span>": "<b>{{ore_gap}}</b><span>Win-rate gap between players whose opening villages produce plenty of ore (5+ dots) and none</span>",
+ "はじめの置き方の感覚は、<a href=\"quiz.html\">初期配置クイズ</a>で試せます。": "Test your feel for the opening in the <a href=\"quiz.html\">Opening Quiz</a>."
 }
