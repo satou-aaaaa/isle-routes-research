@@ -84,8 +84,17 @@ def test_round_values_are_consistent():
 
 def test_time_limit_stops_the_search():
     """時間の上限は、1つの終わり方の先を読んでいる途中でも効く（CI や測定が止まらなくならない）。"""
-    g = next(x for x in _main_positions(4, min_vp=8, seed=950) if x.vp(x.current) >= 7)
-    t = time.monotonic()
-    with pytest.raises(TooBig):
-        RoundSolver(g.current, MAXN, max_seconds=1).value(g.clone())
-    assert time.monotonic() - t < 15
+    # AI の打ち方が変わると集まる局面も変わるので、決まった1局面に頼らず、
+    # 数局面のうち上限に当たったものがあること・どれも上限の少しあとで止まることを見る
+    stopped = 0
+    for seed in range(950, 954):
+        g = next((x for x in _main_positions(4, min_vp=8, seed=seed) if x.vp(x.current) >= 7), None)
+        if g is None:
+            continue
+        t = time.monotonic()
+        try:
+            RoundSolver(g.current, MAXN, max_seconds=1).value(g.clone())
+        except TooBig:
+            stopped += 1
+        assert time.monotonic() - t < 15
+    assert stopped >= 1
