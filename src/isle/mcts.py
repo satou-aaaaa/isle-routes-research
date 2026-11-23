@@ -33,8 +33,8 @@ def determinize(g: Game, me: int, rng: random.Random) -> Game:
     見えないもの: 山の順番・相手の発展カードの中身（枚数は見える）・この先の乱数。
     手札の資源は数えればほぼ分かるので、そのまま使う（盗まれた札は相手の手札の中身ごと見えている扱い）。
     """
-    c = g.clone(keep_rng=False)
-    c.rng = random.Random(rng.getrandbits(64))
+    # この先の出目は新しい seed の乱数で引く（乱数の状態は写さない。R-006）
+    c = g.clone(rng=rng.getrandbits(64))
     pool = list(c.dev_deck)
     counts = []
     for q, pl in enumerate(c.players):

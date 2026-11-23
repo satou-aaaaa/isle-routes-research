@@ -58,6 +58,30 @@ def main() -> None:
     for name, mod in (("前の版", ref_game_v0), ("速い版", fast)):
         c, la = micro_us(mod)
         print(f"{name}: 複製 {c:.1f}µs・合法手の生成 {la:.1f}µs")
+    kinds = "・".join(f"{k} {v:.1f}µs" for k, v in clone_kinds_us())
+    print(f"速い版の複製の種類（R-006）: {kinds}")
+
+
+def clone_kinds_us(reps: int = 20000) -> list[tuple[str, float]]:
+    """速い版の複製を、乱数の扱い方ごとに比べる（マイクロ秒）。"""
+    g = fast.Game(seed=1)
+    rng = random.Random(1)
+    for _ in range(600):
+        g.apply(rng.choice(g.legal_actions()))
+    r = random.Random(0)
+    kinds = [
+        ("乱数を写す clone()", g.clone),
+        ("乱数を渡す clone(rng=Random)", lambda: g.clone(rng=r)),
+        ("新しい seed clone(rng=int)", lambda: g.clone(rng=12345)),
+        ("写さず＋Random を作る", lambda: (g.clone(keep_rng=False), random.Random(1))),
+    ]
+    out = []
+    for name, f in kinds:
+        t = time.perf_counter()
+        for _ in range(reps):
+            f()
+        out.append((name, (time.perf_counter() - t) / reps * 1e6))
+    return out
 
 
 if __name__ == "__main__":
