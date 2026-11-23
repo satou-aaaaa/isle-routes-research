@@ -145,15 +145,20 @@ class Game:
                 self.number_yield[num].append((v, h, r))
 
     # ---- 便利関数 ----
-    def clone(self, keep_rng: bool = True) -> Game:
+    def clone(self, keep_rng: bool = True, rng: random.Random | int | None = None) -> Game:
         """探索用の写し。盤面の並べ方など変わらないものは共有し、変わるものだけ写す。
 
+        keep_rng=True（既定）は乱数の状態まで写す。写しは元と全く同じに続く（約23µs、大半が写し）。
         keep_rng=False は乱数を写さない速い写し。出目・盗むカード・山札を自分で決める
         読みの中だけで使う（写しの上で乱数を使うと RuntimeError）。
+        rng を渡すと、乱数は写さずにそれを使う（int なら新しい seed）。先の出目を引き直す
+        探索（MCTS の決定化）用。渡した random.Random はそのまま写しが使うので、ほかと共有しない。
         """
         g = Game.__new__(Game)
         g.__dict__.update(self.__dict__)
-        if keep_rng and self.rng is not NO_RNG:
+        if rng is not None:
+            g.rng = random.Random(rng) if isinstance(rng, int) else rng
+        elif keep_rng and self.rng is not NO_RNG:
             g.rng = random.Random()
             g.rng.setstate(self.rng.getstate())
         else:
