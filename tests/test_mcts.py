@@ -79,3 +79,29 @@ def test_mcts_returns_a_legal_action_in_main():
         if checked >= 5:
             break
     assert checked >= 3
+
+
+def test_rollout_rounds_stop_at_my_pre_roll():
+    """読む深さ（R-008）: rounds 巡あとの自分のサイコロの前で止まる。"""
+    from isle.game import PRE_ROLL
+    from isle.mcts import _play_until_my_next_turn, _RolloutPolicy
+
+    g = _midgame(11, steps=200)
+    while g.phase != MAIN or g.to_act != g.current:
+        g.apply(make_agent("greedy", seed=1).act(g))
+    me = g.current
+    for rounds in (1, 2):
+        c = g.clone(rng=5)
+        _play_until_my_next_turn(c, me, _RolloutPolicy(seed=3), rounds)
+        assert not c.is_over()
+        assert c.current == me and c.phase == PRE_ROLL
+        # 1巡は4手番（4人）先、2巡は8手番先
+        assert c.turns - g.turns == 4 * rounds
+
+
+def test_mcts_depth2_plays_legal_moves():
+    g = _midgame(5, steps=150)
+    while g.phase != MAIN or g.to_act != g.current:
+        g.apply(make_agent("greedy", seed=1).act(g))
+    a = MCTSAgent(seed=2, sims=12, depth=2).act(g)
+    assert a in g.legal_actions()
