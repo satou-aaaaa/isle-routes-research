@@ -1,0 +1,5 @@
+finished: 2026-11-26T06:10Z
+exit_code: 0
+commit: f2395acf22c9987387c27afed1166c8c66b02954
+run: https://github.com/satou-aaaaa/isle-routes-research/actions/runs/45762412127
+command: python scripts/mcts_match.py --games 100 --workers 4 --sims 48 --depth 1 --opp mcts
