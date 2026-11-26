@@ -1,0 +1,26 @@
+{
+ "opts": {
+  "sims": 192,
+  "top_k": 5,
+  "c_ucb": 0.5,
+  "temp": 1.0,
+  "depth": 2
+ },
+ "opp": "mcts",
+ "games": 400,
+ "wins": 102,
+ "win_rate": 0.255,
+ "ci95": [
+  0.2123,
+  0.2977
+ ],
+ "avg_vp": 7.08,
+ "seat_wins": [
+  27,
+  26,
+  22,
+  27
+ ],
+ "avg_seconds_per_game": 109.12,
+ "wall_seconds": 11117.1
+}
