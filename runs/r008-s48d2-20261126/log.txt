@@ -1,0 +1,2 @@
+{"opts": {"sims": 48, "top_k": 5, "c_ucb": 0.5, "temp": 1.0, "depth": 2}, "opp": "mcts", "games": 400, "wins": 88, "win_rate": 0.22, "ci95": [0.1794, 0.2606], "avg_vp": 6.8, "seat_wins": [21, 24, 17, 26], "avg_seconds_per_game": 34.5, "wall_seconds": 3490.0}
+MCTS の勝率 22.0%（95%の幅 17.9%〜26.1%）400局 → はっきりしない
