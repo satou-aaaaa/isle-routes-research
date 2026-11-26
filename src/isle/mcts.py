@@ -6,7 +6,7 @@
 2. 1回の読みごとに、見えない所を引き直す（決定化）:
    - 発展カードの山の順番と、相手が持っている発展カードの中身（見えない札をまとめて配り直す）
    - この先のサイコロ・盗むカード・山から引くカードは、新しい乱数で引く
-3. 候補の手を打ち、全員を貪欲AIで動かして、自分の次の手番が来るまで（1巡）進める。
+3. 候補の手を打ち、全員を貪欲AIで動かして、自分の次の手番が来るまで（depth 巡。既定1巡）進める。
 4. 葉の値は、4人の評価関数の値を softmax にした「自分の勝ちやすさ」（勝ったら1、負けたら0）。
 5. 候補の選び方は UCB1（Kocsis & Szepesvári 2006）。木は根だけ持つ（読みごとに隠れた所が違うので、
    深い所の手は同じ節点にまとめにくい。Cowling, Powley, Whitehouse 2012 の ISMCTS の根の部分）。
@@ -83,12 +83,14 @@ class MCTSAgent(WinCheckAgent):
         top_k: int = 5,
         c_ucb: float = 0.5,
         temp: float = 1.0,
+        depth: int = 1,
     ):
         super().__init__(weights, seed)
         self.sims = sims
         self.top_k = top_k
         self.c_ucb = c_ucb
         self.temp = temp
+        self.depth = depth
         self.search_rng = random.Random(None if seed is None else seed * 7919 + 1)
         self.searches = 0
 
@@ -156,7 +158,7 @@ class MCTSAgent(WinCheckAgent):
             c = determinize(g, me, random.Random(seeds[n[i]]))
             if c.winner is None:
                 c.apply(cands[i])
-                _play_until_my_next_turn(c, me, rollout)
+                _play_until_my_next_turn(c, me, rollout, self.depth)
             w[i] += leaf_value(c, me, self.temp, self.w)
             n[i] += 1
         best = max(range(len(cands)), key=lambda j: (n[j], w[j] / n[j]))
@@ -169,12 +171,20 @@ class _RolloutPolicy(GreedyAgent):
     name = "rollout"
 
 
-def _play_until_my_next_turn(c: Game, me: int, policy: GreedyAgent) -> None:
-    """自分の今の手番の残りと相手3人の手番を進め、自分の次のサイコロの前で止める。"""
-    start_turns = c.turns
-    for _ in range(ROLLOUT_LIMIT):
+def _play_until_my_next_turn(c: Game, me: int, policy: GreedyAgent, rounds: int = 1) -> None:
+    """自分の今の手番の残りと相手3人の手番を進め、rounds 巡あとの自分のサイコロの前で止める。
+
+    rounds=2 なら、自分の次の手番も貪欲AIで打ち、そのあとの相手3人も進めて、
+    2回あとの手番の前で止める。
+    """
+    seen = 0
+    last = c.turns
+    for _ in range(ROLLOUT_LIMIT * rounds):
         if c.is_over():
             return
-        if c.current == me and c.phase == PRE_ROLL and c.turns > start_turns:
-            return
+        if c.current == me and c.phase == PRE_ROLL and c.turns != last:
+            last = c.turns
+            seen += 1
+            if seen >= rounds:
+                return
         c.apply(policy.act(c))

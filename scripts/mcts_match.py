@@ -2,6 +2,10 @@
 
     python scripts/mcts_match.py --games 100 --workers 4 --sims 48
     python scripts/mcts_match.py --games 100 --workers 4 --sims 48 --out runs/r003
+    python scripts/mcts_match.py --games 100 --sims 96 --depth 2 --opp mcts   # R-008
+
+--opp mcts は R-003 の既定の MCTS（読み48回・候補5手・1巡）を相手3人にする。
+--out を省くと、環境変数 RESEARCH_OUT があればその下の --tag（既定 s<読み>d<深さ>）に書く。
 
 --games は盤（seed）の数。各盤で MCTS が4つの席を1回ずつ打つので、対局数は games × 4。
 基準の勝率は 25%。95% の幅の下の端が 25% を超えれば「はっきり強い」。
@@ -35,6 +39,8 @@ def one_board(job: tuple) -> list[dict]:
         for j in range(4):
             if j == seat:
                 agents.append(MCTSAgent(seed=s * 31 + j, **opts))
+            elif opp == "mcts":
+                agents.append(MCTSAgent(seed=s * 31 + j + 17))
             else:
                 agents.append(make_agent(opp, seed=s * 31 + j))
         t = time.time()
@@ -63,10 +69,21 @@ def main() -> None:
     ap.add_argument("--top-k", type=int, default=5)
     ap.add_argument("--c-ucb", type=float, default=0.5)
     ap.add_argument("--temp", type=float, default=1.0)
+    ap.add_argument("--depth", type=int, default=1)
     ap.add_argument("--opp", default="greedy_win")
-    ap.add_argument("--out", default=os.environ.get("RESEARCH_OUT"))
+    ap.add_argument("--out")
+    ap.add_argument("--tag")
     args = ap.parse_args()
-    opts = {"sims": args.sims, "top_k": args.top_k, "c_ucb": args.c_ucb, "temp": args.temp}
+    if args.out is None and os.environ.get("RESEARCH_OUT"):
+        tag = args.tag or f"s{args.sims}d{args.depth}"
+        args.out = str(Path(os.environ["RESEARCH_OUT"]) / tag)
+    opts = {
+        "sims": args.sims,
+        "top_k": args.top_k,
+        "c_ucb": args.c_ucb,
+        "temp": args.temp,
+        "depth": args.depth,
+    }
     jobs = [(args.seed + i, opts, args.opp) for i in range(args.games)]
     t = time.time()
     recs: list[dict] = []
